@@ -21,3 +21,6 @@ __pycache__/
 **/06_验证记录/*_render/
 **/06_验证记录/*.png
 **/06_验证记录/*.jpg
+
+**/.mplconfig/
+**/data/att_faces/

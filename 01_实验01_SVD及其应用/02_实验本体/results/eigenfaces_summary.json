@@ -1,0 +1,129 @@
+{
+  "seed": 20260917,
+  "people": 40,
+  "images": 400,
+  "dimensions": 10304,
+  "training_images": 280,
+  "test_images": 120,
+  "primary_k": 80,
+  "primary_accuracy": 0.9833333333333333,
+  "primary_correct": 118,
+  "wilson_95": [
+    0.9412640370278428,
+    0.9954174354340787
+  ],
+  "metrics": [
+    {
+      "k": 1,
+      "correct": 9,
+      "test_count": 120,
+      "accuracy": 0.075,
+      "test_mse": 0.01977729354894186,
+      "test_psnr_db": 17.03833140301065,
+      "training_centered_energy": 0.17320636909198972,
+      "train_library_parameter_ratio": 138.12332439678283
+    },
+    {
+      "k": 2,
+      "correct": 41,
+      "test_count": 120,
+      "accuracy": 0.3416666666666667,
+      "test_mse": 0.017076306412694465,
+      "test_psnr_db": 17.676060609336524,
+      "training_centered_energy": 0.3089458967241309,
+      "train_library_parameter_ratio": 91.67259786476869
+    },
+    {
+      "k": 5,
+      "correct": 99,
+      "test_count": 120,
+      "accuracy": 0.825,
+      "test_mse": 0.012908171890898209,
+      "test_psnr_db": 18.89135259973158,
+      "training_centered_energy": 0.4832213724337817,
+      "train_library_parameter_ratio": 45.633303808680246
+    },
+    {
+      "k": 10,
+      "correct": 109,
+      "test_count": 120,
+      "accuracy": 0.9083333333333333,
+      "test_mse": 0.01026492046751944,
+      "test_psnr_db": 19.88644411188786,
+      "training_centered_energy": 0.6039074757028671,
+      "train_library_parameter_ratio": 24.840887174541948
+    },
+    {
+      "k": 20,
+      "correct": 114,
+      "test_count": 120,
+      "accuracy": 0.95,
+      "test_mse": 0.00831670291729004,
+      "test_psnr_db": 20.800488117648968,
+      "training_centered_energy": 0.7090308629324414,
+      "train_library_parameter_ratio": 12.996972754793138
+    },
+    {
+      "k": 32,
+      "correct": 117,
+      "test_count": 120,
+      "accuracy": 0.975,
+      "test_mse": 0.007174490465090832,
+      "test_psnr_db": 21.44208937250024,
+      "training_centered_energy": 0.7725248560833606,
+      "train_library_parameter_ratio": 8.267008985879333
+    },
+    {
+      "k": 50,
+      "correct": 117,
+      "test_count": 120,
+      "accuracy": 0.975,
+      "test_mse": 0.006220616915294768,
+      "test_psnr_db": 22.061665430225958,
+      "training_centered_energy": 0.8295341003100442,
+      "train_library_parameter_ratio": 5.347726800913431
+    },
+    {
+      "k": 80,
+      "correct": 118,
+      "test_count": 120,
+      "accuracy": 0.9833333333333333,
+      "test_mse": 0.005472132786804191,
+      "test_psnr_db": 22.618433725677956,
+      "training_centered_energy": 0.8849489207520094,
+      "train_library_parameter_ratio": 3.366440146366963
+    },
+    {
+      "k": 120,
+      "correct": 118,
+      "test_count": 120,
+      "accuracy": 0.9833333333333333,
+      "test_mse": 0.004950565727567892,
+      "test_psnr_db": 23.05345169082154,
+      "training_centered_energy": 0.9289014862873256,
+      "train_library_parameter_ratio": 2.25332400279916
+    },
+    {
+      "k": 200,
+      "correct": 116,
+      "test_count": 120,
+      "accuracy": 0.9666666666666667,
+      "test_mse": 0.004437224436251739,
+      "test_psnr_db": 23.528886039720728,
+      "training_centered_energy": 0.9778207611892737,
+      "train_library_parameter_ratio": 1.3563605728727886
+    },
+    {
+      "k": 279,
+      "correct": 116,
+      "test_count": 120,
+      "accuracy": 0.9666666666666667,
+      "test_mse": 0.00415321821818827,
+      "test_psnr_db": 23.816152496112277,
+      "training_centered_energy": 1.0,
+      "train_library_parameter_ratio": 0.9736369649437777
+    }
+  ],
+  "centered_rank": 279,
+  "orthogonality_error": 6.771607294936853e-14
+}

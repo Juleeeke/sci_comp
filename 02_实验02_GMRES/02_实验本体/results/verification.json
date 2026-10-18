@@ -1,0 +1,17 @@
+{
+  "checks": {
+    "all_assigned_cases_present": true,
+    "all_direct_residuals_small": true,
+    "gauss_seidel_diverges_only_in_1_2": true,
+    "all_gmres_runs_converged": true,
+    "scipy_gmres_cross_checks_passed": true,
+    "histories_match_final_metrics": true,
+    "second_order_GMRES_bvp_error_max": true,
+    "second_order_GMRES_bvp_error_discrete_l2": true,
+    "second_order_ILU-GMRES_bvp_error_max": true,
+    "second_order_ILU-GMRES_bvp_error_discrete_l2": true
+  },
+  "passed": 10,
+  "total": 10,
+  "all_passed": true
+}

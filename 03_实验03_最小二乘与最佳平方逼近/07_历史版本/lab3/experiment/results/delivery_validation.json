@@ -1,0 +1,136 @@
+{
+  "passed": 26,
+  "total": 26,
+  "checks": [
+    {
+      "name": "Final English PDF has 10 pages",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "No empty or orphan body pages",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "English report has no CJK characters",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "All seven experiment labels are present",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "All seven figures are present",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Title-only cover",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Standalone LaTeX has no external figure or source dependency",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "PDF is newer than generated LaTeX",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Compilation has no errors or layout overflow",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "All final PDF pages render successfully",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Report literal exact coefficient vector",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Report literal exact residual vector",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Report line normal equations match original points",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Report line rational coefficients and RSS",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Numerical verification passed in full",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "All source programs parse",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "linear_fit: standalone PDF and PNG readable",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "population_models: standalone PDF and PNG readable",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "population_log_residuals: standalone PDF and PNG readable",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "continuous_approximations: standalone PDF and PNG readable",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "airfoil_fit: standalone PDF and PNG readable",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Input data CSV files retained",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Pointwise fit CSV files retained",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Original PDF and Markdown retained",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Reproduction instructions and dependency versions retained",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Report regeneration reproduces exact LaTeX bytes",
+      "passed": true,
+      "detail": ""
+    }
+  ]
+}

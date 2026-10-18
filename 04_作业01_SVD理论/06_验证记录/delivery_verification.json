@@ -1,0 +1,63 @@
+{
+  "checks_passed": 43,
+  "checks_total": 43,
+  "checks": {
+    "39_numerical_assertions": true,
+    "image_metrics.csv_requested_ranks": true,
+    "data_errors.csv_requested_ranks": true,
+    "assignment_preserved": true,
+    "template_preserved": true,
+    "docx_integrity": true,
+    "all_editable_office_equations": true,
+    "eight_row_template": true,
+    "four_figures_in_word": true,
+    "word_english": true,
+    "historical_field_Course": true,
+    "historical_field_Class": true,
+    "historical_field_Name": true,
+    "historical_field_Student ID": true,
+    "historical_field_Date": true,
+    "historical_field_Instructor": true,
+    "historical_field_Grade": true,
+    "word_author_blank": true,
+    "pdf_25_pages": true,
+    "pdf_english": true,
+    "pdf_no_replacement_glyph": true,
+    "pdf_no_formula_conversion_error": true,
+    "pdf_author_blank": true,
+    "pdf_all_pages_have_content": true,
+    "problem_1": true,
+    "problem_2": true,
+    "problem_3": true,
+    "problem_4": true,
+    "problem_5": true,
+    "problem_6": true,
+    "problem_7": true,
+    "problem_8": true,
+    "problem_9": true,
+    "problem_10": true,
+    "problem_11": true,
+    "problem_12": true,
+    "problem_13": true,
+    "problem_14": true,
+    "problem_15": true,
+    "optional_challenge": true,
+    "all_prose_code_table_values_present": true,
+    "pdf_no_text_outside_page": true,
+    "one_page_essay": true
+  },
+  "pdf_pages": 25,
+  "editable_equations": 64,
+  "missing_content": [],
+  "pdf_producer": "LibreOfficeDev 26.8.0.0.alpha0 (AARCH64)",
+  "artifacts": {
+    "SVD_Homework_English.docx": {
+      "bytes": 1334193,
+      "sha256": "ead14e633e8126b33798a30538b678e0c05bc23576cbd4bacaa4548ffa4e0e7c"
+    },
+    "SVD_Homework_English.pdf": {
+      "bytes": 957328,
+      "sha256": "5400024eceeb35086771a62e7b9d18c8c82989f15e7001e6c09bc447c3b3a712"
+    }
+  }
+}

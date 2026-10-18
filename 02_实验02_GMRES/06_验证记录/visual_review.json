@@ -1,0 +1,20 @@
+{
+  "status": "passed",
+  "identity": {
+    "class": "230116",
+    "name": "yule yang",
+    "student_id": "23376268",
+    "lab_date": "2026.10.17",
+    "instructor": "",
+    "grade": ""
+  },
+  "pages_per_format": 9,
+  "all_pages_rendered_and_bounds_checked": true,
+  "changed_cover_and_reproduction_pages_visually_reviewed": true,
+  "unchanged_mathematical_sections_previously_reviewed": true,
+  "word_equations_native": true,
+  "pdf_sha256": "db6fa8a7bebed74baa3c7a89d4e234800b38ade8ffec4edd9109262ff8fdf237",
+  "docx_sha256": "24ca46650abafbaa0b59fd0ebf848a99c0d8023c39cf2481c2b9f3c406b38609",
+  "renderer": "Bundled LibreOffice",
+  "native_microsoft_word_gui_tested": false
+}

@@ -1,0 +1,10 @@
+{
+  "verified_utc": "2026-10-15T08:38:31.961658+00:00",
+  "archive": "Lab3_submission.zip",
+  "bytes": 736856,
+  "sha256": "053ddadd73930ce71ea3103f3bc70a9322ca669b79428e07cc52dd4d01c82f68",
+  "entry_count": 34,
+  "crc_passed": true,
+  "all_entry_bytes_match": true,
+  "all_manifest_hashes_match": true
+}

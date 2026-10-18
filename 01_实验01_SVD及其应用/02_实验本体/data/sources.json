@@ -1,0 +1,16 @@
+[
+  {
+    "file": "02_实验本体/data/att_faces.zip",
+    "url": "https://www.cl.cam.ac.uk/Research/DTG/attarchive/pub/data/att_faces.zip",
+    "bytes": 3769022,
+    "sha256": "509d763bd2276aa054d260d7f1000e8be212738134f2f83d8ff13bc2adf1c8ec",
+    "download_date": "2026-09-17"
+  },
+  {
+    "file": "02_实验本体/data/astronaut.png",
+    "url": "https://raw.githubusercontent.com/scikit-image/scikit-image/v0.25.2/skimage/data/astronaut.png",
+    "bytes": 791555,
+    "sha256": "88431cd9653ccd539741b555fb0a46b61558b301d4110412b5bc28b5e3ea6cb5",
+    "download_date": "2026-09-17"
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "source": "synthetic smooth PCA coefficient trajectories, not real video",
+  "frames": 300,
+  "k": 32,
+  "reset_interval": 60,
+  "direct_int8_bytes": 9600,
+  "delta_int16_bytes": 19200,
+  "direct_zlib_bytes": 1979,
+  "delta_zlib_bytes": 1387,
+  "extra_factor_vs_direct_zlib": 1.426820475847152,
+  "ratio_with_model_vs_raw_pixels": 2.2699851884053928
+}

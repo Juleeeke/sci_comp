@@ -1,0 +1,56 @@
+{
+  "checks_passed": 33,
+  "checks_total": 33,
+  "checks": {
+    "22_numerical_checks_pass": true,
+    "512_image_metric_rows": true,
+    "original_Lab_Instructions.pdf": true,
+    "original_Original_Report_Template.docx": true,
+    "data_att_faces.zip": true,
+    "data_astronaut.png": true,
+    "docx_zip_integrity": true,
+    "editable_office_equations": true,
+    "word_error_difference_preserved": true,
+    "word_quantizer_clipping_preserved": true,
+    "retained_eight_row_template": true,
+    "ten_figures_in_word": true,
+    "word_content_english": true,
+    "blank_Class": true,
+    "blank_Name": true,
+    "blank_Student ID": true,
+    "blank_Lab date": true,
+    "blank_Instructor": true,
+    "blank_Grade": true,
+    "Word_16_pages": true,
+    "Word_english": true,
+    "Word_no_replacement_glyph": true,
+    "Word_no_blank_pages": true,
+    "Word_no_personal_author": true,
+    "Word_text_within_page": true,
+    "Word_all_report_paragraphs_present": true,
+    "LaTeX_16_pages": true,
+    "LaTeX_english": true,
+    "LaTeX_no_replacement_glyph": true,
+    "LaTeX_no_blank_pages": true,
+    "LaTeX_no_personal_author": true,
+    "LaTeX_text_within_page": true,
+    "LaTeX_all_report_paragraphs_present": true
+  },
+  "pdfs": {
+    "Word": {
+      "pages": 16,
+      "bytes": 1782282,
+      "sha256": "46be721b1f58a342ac486514f18a1c6340fe4b5c868cab307045b66083f77e9b",
+      "missing_paragraphs": [],
+      "producer": "LibreOfficeDev 26.8.0.0.alpha0 (AARCH64)"
+    },
+    "LaTeX": {
+      "pages": 16,
+      "bytes": 5446691,
+      "sha256": "2b330b95ca8d0cda8c750fe03532f91fc3e228127ceb5e5a87d9868f4f70b7b6",
+      "missing_paragraphs": [],
+      "producer": "xdvipdfmx (0.1)"
+    }
+  },
+  "rendering": "All pages inspected in contact sheets; representative pages inspected at higher resolution."
+}

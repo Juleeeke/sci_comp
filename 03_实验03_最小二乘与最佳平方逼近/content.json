@@ -1,0 +1,528 @@
+{
+  "title": "Least Squares and Best Square Approximation",
+  "environment": "macOS on Apple Silicon; Python with NumPy and SciPy; Matplotlib for plots. AI assistance: Codex. Exact package versions and measured results are archived with the experiment.",
+  "objectives": "Complete all seven experiments: the overdetermined system, line fitting, two population models, three continuous projections, and separate upper and lower RAE2822 airfoil fits.",
+  "summary": "All seven experiments were executed and independently checked. The literal system gives RSS 4.1808988764. The fitted line has RSS 94.186046512. The quadratic log population model substantially reduces the log residual. All 129 supplied airfoil coordinates are retained.",
+  "conclusions": "Projection orthogonality explains discrete and continuous least squares. Stable QR is preferable to forming normal equations for poorly scaled designs. Population fitting is performed in log space; airfoil surfaces are split by contour order, not the sign of the ordinate.",
+  "pages": [
+    {
+      "title": "1 Scope and least squares methods",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "This report completes Experiments 1.1, 1.2, 1.3, 2.1, 2.2, 2.3 and 3.1 in the supplied seven page handout. All numerical inputs come from that PDF: five line points, 24 population observations from 1790 to 2020, and 129 airfoil coordinates. No external dataset is substituted."
+        },
+        {
+          "kind": "eq",
+          "latex": "\\min_c\\|Ac-b\\|_2^2,\\qquad A^T(Ac-b)=0,\\qquad A^TAc=A^Tb."
+        },
+        {
+          "kind": "p",
+          "text": "Differentiating the quadratic objective gives the normal equations. When the columns are independent the Gram matrix is positive definite, giving a unique least squares solution. The residual need not vanish, but is orthogonal to every design column."
+        },
+        {
+          "kind": "eq",
+          "latex": "A=QR,\\quad Q^TQ=I,\\qquad Rc=Q^Tb."
+        },
+        {
+          "kind": "p",
+          "text": "An explicit Householder QR implementation is compared with NumPy least squares and with normal equations solved by Gaussian elimination with partial pivoting. No inverse is formed. The hand coded QR is the principal computational solution; the normal equations are included to satisfy the mathematical derivation and to examine conditioning."
+        },
+        {
+          "kind": "eq",
+          "latex": "\\kappa_2(A^TA)=\\kappa_2(A)^2\\quad\\text{for full column rank }A."
+        },
+        {
+          "kind": "p",
+          "text": "A subtle source issue occurs in Experiment 1.1: the third equation prints x1 + x2 + 2x2 = 2. Its literal row is (1,3,0). A plausible correction is x1 + x2 + 2x3 = 2, giving row (1,1,2). The literal reading is the main answer; the alternative is separately solved and labeled rather than silently replacing the supplied equation."
+        },
+        {
+          "kind": "p",
+          "text": "For continuous problems the residual is orthogonal in an integral inner product. Continuous projections minimize integrated squared error over the full interval; they are not interpolation at selected nodes. Numerical quadrature is used only to verify the derived exact answers."
+        }
+      ]
+    },
+    {
+      "title": "2 Experiment 1 1 overdetermined system",
+      "blocks": [
+        {
+          "kind": "h",
+          "text": "Literal printed equation"
+        },
+        {
+          "kind": "eq",
+          "latex": "A=\\begin{pmatrix}1&2&4\\\\2&1&1\\\\1&3&0\\\\1&-1&-2\\end{pmatrix},\\qquad b=\\begin{pmatrix}-1\\\\4\\\\2\\\\1\\end{pmatrix}."
+        },
+        {
+          "kind": "eq",
+          "latex": "A^TA=\\begin{pmatrix}7&6&4\\\\6&15&11\\\\4&11&21\\end{pmatrix},\\qquad A^Tb=\\begin{pmatrix}10\\\\7\\\\-2\\end{pmatrix}."
+        },
+        {
+          "kind": "eq",
+          "latex": "\\widehat{x}=\\begin{pmatrix}1.5213483\\\\0.22808989\\\\-0.50449438\\end{pmatrix},\\qquad r=b-A\\widehat{x}=\\begin{pmatrix}-0.95955056\\\\1.2337079\\\\-0.20561798\\\\-1.3022472\\end{pmatrix}."
+        },
+        {
+          "kind": "p",
+          "text": "Residual sum of squares = 4.180898876404. Full precision coefficients and residuals are saved in results.json."
+        },
+        {
+          "kind": "h",
+          "text": "Possible corrected equation"
+        },
+        {
+          "kind": "eq",
+          "latex": "A=\\begin{pmatrix}1&2&4\\\\2&1&1\\\\1&1&2\\\\1&-1&-2\\end{pmatrix},\\qquad b=\\begin{pmatrix}-1\\\\4\\\\2\\\\1\\end{pmatrix}."
+        },
+        {
+          "kind": "eq",
+          "latex": "A^TA=\\begin{pmatrix}7&4&6\\\\4&7&13\\\\6&13&25\\end{pmatrix},\\qquad A^Tb=\\begin{pmatrix}10\\\\3\\\\2\\end{pmatrix}."
+        },
+        {
+          "kind": "eq",
+          "latex": "\\widehat{x}=\\begin{pmatrix}1\\\\4.5\\\\-2.5\\end{pmatrix},\\qquad r=b-A\\widehat{x}=\\begin{pmatrix}-1\\\\0\\\\1.5\\\\-0.5\\end{pmatrix}."
+        },
+        {
+          "kind": "p",
+          "text": "Residual sum of squares = 3.500000000000. Full precision coefficients and residuals are saved in results.json."
+        },
+        {
+          "kind": "p",
+          "text": "For the literal system the exact coefficient vector is (1354/890, 203/890, -449/890), and RSS = 3721/890. For the alternative it is (1, 9/2, -5/2), and RSS = 7/2. Both residuals satisfy the appropriate normal orthogonality condition; their RSS values cannot be compared as competing fits to the same design because the two designs differ."
+        }
+      ]
+    },
+    {
+      "title": "3 Experiment 1 2 fitted line",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "Using columns 1 and x, the data are fitted by a + b x with equal weights on all five observations. The normal system and exact rational solution are:"
+        },
+        {
+          "kind": "eq",
+          "latex": "\\begin{pmatrix}5&151\\\\151&4629\\end{pmatrix}\\begin{pmatrix}a\\\\b\\end{pmatrix}=\\begin{pmatrix}720\\\\22240\\end{pmatrix}."
+        },
+        {
+          "kind": "eq",
+          "latex": "a=-\\frac{3170}{43},\\qquad b=\\frac{310}{43},\\qquad \\widehat{y}(x)=-73.72093023+7.209302326x."
+        },
+        {
+          "kind": "table",
+          "headers": [
+            "x",
+            "Observed y",
+            "Fitted y",
+            "Residual"
+          ],
+          "rows": [
+            [
+              "25",
+              "110",
+              "106.511628",
+              "3.488372"
+            ],
+            [
+              "27",
+              "115",
+              "120.930233",
+              "-5.930233"
+            ],
+            [
+              "31",
+              "155",
+              "149.767442",
+              "5.232558"
+            ],
+            [
+              "33",
+              "160",
+              "164.186047",
+              "-4.186047"
+            ],
+            [
+              "35",
+              "180",
+              "178.604651",
+              "1.395349"
+            ]
+          ],
+          "size": 9
+        },
+        {
+          "kind": "eq",
+          "latex": "\\operatorname{RSS}=\\frac{4050}{43}=94.18604651."
+        },
+        {
+          "kind": "fig",
+          "path": "02_实验本体/results/figures/linear_fit.png",
+          "caption": "The least squares line and all five supplied observations.",
+          "height": 2.55
+        },
+        {
+          "kind": "p",
+          "text": "The fit minimizes squared vertical deviations, not perpendicular distances to the line. The intercept is extrapolated far outside the observed x range 25 to 35, so it should not be interpreted as an observed response at x = 0. Residuals sum to zero and their x weighted sum is zero."
+        }
+      ]
+    },
+    {
+      "title": "4 Experiment 1 3 population growth models",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "Let t = year - 1790 in years, and u = t/100 in centuries. The constant rate model and variable rate model become linear least squares problems after taking natural logarithms. The scaling by 100 improves numerical conditioning without changing the fitted functions."
+        },
+        {
+          "kind": "eq",
+          "latex": "\\log P=a+bt,\\qquad P=P_0e^{rt},\\quad P_0=e^a,\\ r=b."
+        },
+        {
+          "kind": "eq",
+          "latex": "\\log P=a+bt+ct^2,\\qquad P=P_0e^{r_0t-r_1t^2/2},\\quad r_0=b,\\ r_1=-2c."
+        },
+        {
+          "kind": "eq",
+          "latex": "P_{\\mathrm{constant}}(t)=6.5484411213\\exp(0.01910297011t)."
+        },
+        {
+          "kind": "eq",
+          "latex": "P_{\\mathrm{variable}}(t)=3.8505777326\\exp(0.03358489266t-0.000062964881t^2)."
+        },
+        {
+          "kind": "table",
+          "headers": [
+            "Model",
+            "Log RSS",
+            "Population RSS",
+            "Population RMSE"
+          ],
+          "rows": [
+            [
+              "Constant rate",
+              "1.7868471415",
+              "69236.899683",
+              "53.710993"
+            ],
+            [
+              "Variable rate",
+              "0.0482483254",
+              "1237.543300",
+              "7.180829"
+            ]
+          ],
+          "size": 9
+        },
+        {
+          "kind": "fig",
+          "path": "02_实验本体/results/figures/population_models.png",
+          "caption": "Fits to the 24 supplied observations in linear and logarithmic population scales.",
+          "height": 2.25
+        },
+        {
+          "kind": "p",
+          "text": "Population is measured in millions. The primary objective is unweighted squared log error, not squared error in population units. The latter is reported as a separate diagnostic. The quadratic model reduces log RSS by 97.2998 percent. This extra flexibility does not establish accurate future extrapolation or a causal demographic law."
+        },
+        {
+          "kind": "p",
+          "text": "The variable rate model has instantaneous log growth r0 - r1 t. The fitted r1 is positive, so the modeled growth rate decreases over the observed period. Predictions and signed log residuals for every year are archived in population_fits.csv."
+        }
+      ]
+    },
+    {
+      "title": "5 Experiment 2 1 best linear approximation",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "For f(x) = x squared on [0,1], minimize the integral of (x squared - c0 - c1 x) squared. Expanding and differentiating with respect to both coefficients gives:"
+        },
+        {
+          "kind": "eq",
+          "latex": "E(c_0,c_1)=\\frac15-\\frac{2c_0}{3}-\\frac{c_1}{2}+c_0^2+c_0c_1+\\frac{c_1^2}{3}."
+        },
+        {
+          "kind": "eq",
+          "latex": "\\begin{pmatrix}1&1/2\\\\1/2&1/3\\end{pmatrix}\\begin{pmatrix}c_0\\\\c_1\\end{pmatrix}=\\begin{pmatrix}1/3\\\\1/4\\end{pmatrix}."
+        },
+        {
+          "kind": "eq",
+          "latex": "c_0=-\\frac16,\\quad c_1=1,\\quad p(x)=x-\\frac16,\\quad \\|x^2-p\\|_2^2=\\frac1{180}."
+        },
+        {
+          "kind": "p",
+          "text": "The two equations express zero inner products of the residual with 1 and x. The Gram determinant is 1/12 and the leading entry is positive, so the solution is the unique minimizer. The squared error equals 1/5 minus the inner product of f with its projection, namely 1/5 - 7/36 = 1/180."
+        },
+        {
+          "kind": "fig",
+          "path": "02_实验本体/results/figures/continuous_approximations.png",
+          "caption": "Continuous projections for Experiments 2.1 to 2.3. The last panel also includes the Taylor polynomial.",
+          "height": 2.35
+        },
+        {
+          "kind": "p",
+          "text": "A best approximation may miss both endpoints. Here it takes values -1/6 and 5/6 at 0 and 1; those endpoint differences do not contradict its optimality for integrated error. The numerical quadrature check agrees with 1/180 to floating point precision."
+        }
+      ]
+    },
+    {
+      "title": "6 Experiment 2 2 Legendre approximation",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "On [-1,1], P0 = 1, P1 = x and P2 = (3x squared - 1)/2 form an orthogonal, but not normalized, basis. Their squared norms are 2, 2/3 and 2/5. Each coefficient is computed independently by dividing the corresponding inner product by the squared norm."
+        },
+        {
+          "kind": "eq",
+          "latex": "a_j=\\frac{\\langle x^3,P_j\\rangle}{\\langle P_j,P_j\\rangle},\\qquad (\\langle x^3,P_0\\rangle,\\langle x^3,P_1\\rangle,\\langle x^3,P_2\\rangle)=(0,2/5,0)."
+        },
+        {
+          "kind": "eq",
+          "latex": "a_0=0,\\qquad a_1=\\frac{2/5}{2/3}=\\frac35,\\qquad a_2=0."
+        },
+        {
+          "kind": "eq",
+          "latex": "p_2=0P_0+\\frac35P_1+0P_2=\\frac35x."
+        },
+        {
+          "kind": "p",
+          "text": "The target x cubed is odd, while P0 and P2 are even. Their products are odd and integrate to zero over the symmetric interval, forcing both even coefficients to vanish. The degree at most two space permits a minimizer of degree one; the quadratic coefficient is not required to be nonzero."
+        },
+        {
+          "kind": "eq",
+          "latex": "\\|x^3-p_2\\|_2^2=\\frac27-\\frac{(2/5)^2}{2/3}=\\frac8{175}."
+        },
+        {
+          "kind": "p",
+          "text": "The residual is orthogonal to all three basis polynomials, not merely to P1. An independent 160 point Gauss Legendre rule checks the Gram matrix, coefficient vector, residual inner products and the exact squared error. Orthogonal bases diagonalize the Gram system and avoid the coupling present in monomial coordinates."
+        },
+        {
+          "kind": "h",
+          "text": "Link with a higher Legendre mode"
+        },
+        {
+          "kind": "eq",
+          "latex": "P_3(x)=\\frac12(5x^3-3x),\\qquad x^3=\\frac35P_1(x)+\\frac25P_3(x)."
+        },
+        {
+          "kind": "p",
+          "text": "Projection onto degrees zero through two drops the P3 component. Its squared norm is (2/5) squared times 2/7, which again gives 8/175. This provides a second analytic check."
+        }
+      ]
+    },
+    {
+      "title": "7 Experiment 2 3 quadratic fit to sine",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "With the monomial basis 1, x, x squared on [-1,1], parity makes odd moments zero. Integration by parts gives the only nonzero right hand side entry, the inner product of x and sin(pi x), equal to 2/pi."
+        },
+        {
+          "kind": "eq",
+          "latex": "\\begin{pmatrix}2&0&2/3\\\\0&2/3&0\\\\2/3&0&2/5\\end{pmatrix}\\begin{pmatrix}c_0\\\\c_1\\\\c_2\\end{pmatrix}=\\begin{pmatrix}0\\\\2/\\pi\\\\0\\end{pmatrix}."
+        },
+        {
+          "kind": "eq",
+          "latex": "c_0=c_2=0,\\quad c_1=\\frac3\\pi,\\quad p_2(x)=\\frac3\\pi x."
+        },
+        {
+          "kind": "p",
+          "text": "The even coefficient block has determinant 16/45, so its homogeneous equations force both even coefficients to zero. This is also required because the target is odd and the projection onto a symmetric polynomial space preserves parity."
+        },
+        {
+          "kind": "eq",
+          "latex": "\\|\\sin(\\pi x)-p_2\\|_2^2=1-\\frac6{\\pi^2}=0.3920728981."
+        },
+        {
+          "kind": "eq",
+          "latex": "T_2(x)=\\pi x,\\qquad \\|\\sin(\\pi x)-T_2\\|_2^2=\\frac{2\\pi^2}{3}-3=3.579736267."
+        },
+        {
+          "kind": "p",
+          "text": "The Taylor polynomial of degree two has no constant or quadratic term, but its slope pi differs from the projection slope 3/pi. Taylor matches derivatives locally at zero. The projection minimizes the integrated squared error over the entire interval and therefore has a much smaller total squared error. A Taylor term of degree three would be a different polynomial outside the assigned degree at most two space."
+        },
+        {
+          "kind": "p",
+          "text": "The sine squared integral equals 1. For any scalar slope a, the squared error is 1 - 4a/pi + 2a squared/3; substitution of a = 3/pi or a = pi gives the two exact errors above. This verifies the comparison without relying on plotting."
+        }
+      ]
+    },
+    {
+      "title": "8 Experiment 3 1 airfoil approximation",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "The 129 coordinates are ordered from the trailing edge along the lower branch to the leading edge, then back along the upper branch. Split at the minimum x, sharing the leading edge; each branch contains 65 points. The small positive ordinates near the trailing edge belong to the lower branch and are not reassigned by sign."
+        },
+        {
+          "kind": "eq",
+          "latex": "g_1(x)=\\sqrt{x}-x,\\qquad g_i(x)=x^{i-1}(1-x),\\quad i=2,3,4."
+        },
+        {
+          "kind": "eq",
+          "latex": "B_{ji}=g_i(x_j),\\qquad \\widehat{\\alpha}=\\arg\\min_\\alpha\\|B\\alpha-y\\|_2^2."
+        },
+        {
+          "kind": "table",
+          "headers": [
+            "Coefficient",
+            "Upper branch",
+            "Lower branch"
+          ],
+          "rows": [
+            [
+              "1",
+              "0.13068978718",
+              "-0.12890279467"
+            ],
+            [
+              "2",
+              "0.09878194827",
+              "-0.10645607131"
+            ],
+            [
+              "3",
+              "0.12688517233",
+              "-0.18696393328"
+            ],
+            [
+              "4",
+              "-0.09259206959",
+              "0.42287649175"
+            ]
+          ],
+          "size": 9
+        },
+        {
+          "kind": "table",
+          "headers": [
+            "Branch",
+            "Points",
+            "RSS",
+            "RMSE",
+            "Max residual"
+          ],
+          "rows": [
+            [
+              "upper",
+              "65",
+              "1.357448018e-06",
+              "1.445123374e-04",
+              "3.129364589e-04"
+            ],
+            [
+              "lower",
+              "65",
+              "1.485217220e-05",
+              "4.780114610e-04",
+              "1.101830302e-03"
+            ]
+          ],
+          "size": 8.5
+        },
+        {
+          "kind": "fig",
+          "path": "02_实验本体/results/figures/airfoil_fit.png",
+          "caption": "Upper and lower fits with equal axis scaling in the geometry panel, and signed coordinate residuals below.",
+          "height": 2.6
+        },
+        {
+          "kind": "p",
+          "text": "All four basis functions vanish at both endpoints, enforcing leading and trailing edge closure. The lower branch has the larger residual. Endpoint rows are zero and do not identify coefficients, but the remaining rows have rank four. The residuals are ordinate errors in chord units, not orthogonal distances to a geometric curve. The experiment assesses geometric fit, not aerodynamic lift or drag."
+        }
+      ]
+    },
+    {
+      "title": "9 Validation and reproducibility",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "All 38 of 38 numerical checks pass. The checks compare every coordinate and population row with the supplied PDF, verify exact rational solutions, use independent LAPACK QR/SVD references, check projection orthogonality, and validate the CSV results."
+        },
+        {
+          "kind": "table",
+          "headers": [
+            "Case",
+            "Condition A",
+            "Condition A T A",
+            "QR vs NumPy"
+          ],
+          "rows": [
+            [
+              "Literal system",
+              "3.0088",
+              "9.053",
+              "1.78e-15"
+            ],
+            [
+              "Line fit",
+              "249.84",
+              "62422",
+              "1.71e-13"
+            ],
+            [
+              "Constant log model",
+              "3.783",
+              "14.311",
+              "1.11e-15"
+            ],
+            [
+              "Variable log model",
+              "18.621",
+              "346.74",
+              "2.00e-15"
+            ],
+            [
+              "Upper airfoil",
+              "80.218",
+              "6435",
+              "1.39e-16"
+            ],
+            [
+              "Lower airfoil",
+              "80.218",
+              "6435",
+              "8.33e-17"
+            ]
+          ],
+          "size": 8.5
+        },
+        {
+          "kind": "p",
+          "text": "For the variable rate model, changing time units from years to centuries reduces the design condition number from 67564.163 to 18.621031. The coefficient transformation back to years is checked independently. Agreement on these examples does not remove the general instability of normal equations for ill conditioned designs."
+        },
+        {
+          "kind": "p",
+          "text": "From the package root, run python reproduce.py to regenerate numerical results, verification, figures, report content, the LaTeX PDF and the editable Word document. See README.md for the individual commands and directory layout. The final PDF is compiled from LaTeX before Word generation; the Word document uses native editable Office equations."
+        },
+        {
+          "kind": "table",
+          "headers": [
+            "Runtime item",
+            "Recorded value"
+          ],
+          "rows": [
+            [
+              "python",
+              "3.13.7 (main, Aug 14 2025, 11:12:11) [Clang 17.0.0 (clang-1700.3.19.1)]"
+            ],
+            [
+              "numpy",
+              "2.5.3"
+            ],
+            [
+              "scipy",
+              "1.18.1"
+            ],
+            [
+              "matplotlib",
+              "3.11.2"
+            ]
+          ],
+          "size": 8.5
+        },
+        {
+          "kind": "p",
+          "text": "Source: the supplied seven page course PDF, preserved byte for byte. The alternative equation in Experiment 1.1 is reported explicitly as a possible correction, not as the authoritative statement. All 24 population values and all 129 airfoil coordinates are supplied observations; fitting them is not a new measurement of population or airfoil performance."
+        }
+      ]
+    }
+  ]
+}

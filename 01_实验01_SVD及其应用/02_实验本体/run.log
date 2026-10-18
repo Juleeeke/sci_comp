@@ -1,0 +1,32 @@
+
+Fontconfig error: No writable cache directories
+	/opt/homebrew/var/cache/fontconfig
+	/Users/juleyau/.cache/fontconfig
+	/Users/juleyau/.fontconfig
+
+Fontconfig error: No writable cache directories
+	/opt/homebrew/var/cache/fontconfig
+	/Users/juleyau/.cache/fontconfig
+	/Users/juleyau/.fontconfig
+
+Fontconfig error: No writable cache directories
+	/opt/homebrew/var/cache/fontconfig
+	/Users/juleyau/.cache/fontconfig
+	/Users/juleyau/.fontconfig
+Matplotlib is building the font cache; this may take a moment.
+matrix [1.00000015e+02 1.00000050e+01 9.99999341e-02 9.99999445e-04]
+Task 1: grayscale rank-20 shape = (512, 512)
+Eigenfaces k=80 accuracy 0.9833333333333333
+{
+  "run_date": "2026-10-09",
+  "seed": 20260917,
+  "python": "3.13.7",
+  "platform": "macOS-27.0-arm64-arm-64bit-Mach-O",
+  "numpy": "2.5.3",
+  "scipy": "1.18.1",
+  "matplotlib": "3.11.2",
+  "pillow": "12.3.0",
+  "elapsed_seconds": 2.167999029159546,
+  "checks_passed": 22,
+  "checks_total": 22
+}

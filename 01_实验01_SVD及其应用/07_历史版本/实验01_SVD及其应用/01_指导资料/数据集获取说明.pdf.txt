@@ -1,0 +1,126 @@
+             实战数据集获取说明（Eigenfaces      1 & 3DMM
+实战   2）
+
+ 本文档说明本目录内与"共享基 SVD 压缩"两个实战相关的数据集：哪些已下载、哪些需签署
+ 协议申请。供备课与布置学生实验参考。
+
+一、实战 1（Eigenfaces）——已下载 ✅
+
+AT&T (ORL) 人脸数据库（剑桥大学 AT&T 实验室，1992–1994）
+
+
+ 项
+                      内容
+ 目
+
+ 本
+ 目
+ 录      att_faces.zip （原始压缩包）+ att_faces/ （已解压）
+ 位
+ 置
+
+ 规
+        40 人 × 10 张 = 400 张灰度人脸（已验证：40 个文件夹、400 个 .pgm）
+ 模
+
+ 图
+ 像
+        92×112 像素，PGM 格式，含光照/表情/角度（左右偏转）/是否戴眼镜等变化
+ 规
+ 格
+
+ 官
+ 方
+          https://www.cl.cam.ac.uk/research/dtg/attarchive/facedatabase.html
+ 来
+ 源
+
+ 教
+ 学     Eigenfaces/PCA 人脸识别与共享基压缩的标准小数据集；OpenCV 官方
+ 用     EigenFaceRecognizer 教程即用它（~96% 识别率）
+ 途
+
+ 使
+ 用   加载 PGM 可用 PIL 直接读；OpenCV 需 cv2.imread(..., IMREAD_GRAYSCALE) ；
+ 提      scikit-learn 也内置 fetch_olivetti_faces （同一数据的规整版）
+ 示
+可选补充（更大、更接近现代基准）：
+
+    Extended Yale B（38 人，2,414 张，光照变化大）：http://vision.ucsd.edu/extyaleb/
+  （~340MB，公开下载）
+   LFW 人脸数据库（5,749 人，13,233 张，无约束环境）：scikit-learn fetch_lfw_people 一行
+  下载
+
+二、实战 2（3D Morphable Model）——需签署协议申请 ⚠️
+
+Blanz & Vetter 1999 的原始 200 张 3D 扫描不公开。公开可用的 3DMM 数据均为受试者人脸数
+据，均需签署非商业研究许可协议，无法直接下载（这是数据伦理要求，不是技术限制）。三个官
+方入口：
+
+
+        机
+  数据集            官方入口            申请方式
+        构
+
+        巴
+  Basel Face  塞                     在线填表注册（非商业研究
+  Model    尔    https://faces.dmi.unibas.ch/bfm/     免费；商用联系
+  (BFM)    大                                          mail@unitectra.ch）
+        学
+
+  Liverpool-  约
+                              下载并签署协议 PDF，由教
+  York Head  克    http://www-
+                              师（非学生）署名后邮件发
+  Model    大    users.york.ac.uk/~np7/research/LYHM/
+                                                                nick.pears@york.ac.uk
+  (LYHM)    学
+
+                              填写 License Agreement，
+                              邮件主题 [FaceScape
+        南
+                                                               Dataset Request] 发
+        京    https://nju-
+  FaceScape                                                nju3dv@nju.edu.cn
+        大    3dv.github.io/projects/FaceScape/
+                                                 （Google Drive / 百度网盘
+        学
+                              下载；新版 bilinear 模型无
+                              需申请密钥）
+
+教学替代方案（无需申请即可演示 3DMM 系数化思想）：
+
+  用 AT&T 人脸跑 Eigenfaces 实验，即可完整演示"共享基 + k 系数"的数学机制（3DMM 只是
+  把图像矩阵换成 3n 维形状/纹理向量，数学完全相同）；
+
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          ​                                      = Sˉ +  或直接引用 Blanz & Vetter 论文（已下载于本目录）中的系数化公式 S model
+
+
+
+
+
+                                                                                                                                                                                                                                        ​                                                                                                                                                                                                                                                                                                                                                                                        ​ 做课堂推导。     α i ​s i   ∑i
+三、本目录已就位的数据资料清单
+
+
+            文件                 类型      归属
+
+                                       实战
+   att_faces.zip  / att_faces/                 数据集（400 张人脸）
+                                                                         1
+
+                                       实战
+   Eigenfaces_for_Recognition_Turk_Pentland_1991.pdf   原始论文
+                                                                         1
+
+                            官方文档（生产基线佐  实战
+   OpenCV_EigenFaceRecognizer_Class_Reference.html
+                            证）                  1
+
+                                       实战
+   Morphable_Model_3D_Faces_Blanz_Vetter_SIGGRAPH99.pdf  原始论文
+                                                                         2

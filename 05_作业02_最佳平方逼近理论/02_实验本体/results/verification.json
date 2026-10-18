@@ -1,0 +1,70 @@
+{
+  "passed": 16,
+  "total": 16,
+  "checks": [
+    {
+      "name": "P2 coefficients",
+      "passed": true
+    },
+    {
+      "name": "P2 squared error",
+      "passed": true
+    },
+    {
+      "name": "P2 orthogonality",
+      "passed": true
+    },
+    {
+      "name": "P4 Legendre coefficients",
+      "passed": true
+    },
+    {
+      "name": "P4 squared error",
+      "passed": true
+    },
+    {
+      "name": "P4 Gram norms",
+      "passed": true
+    },
+    {
+      "name": "P3 orthonormal Gram",
+      "passed": true
+    },
+    {
+      "name": "P3 Parseval residual identity",
+      "passed": true
+    },
+    {
+      "name": "P5 positive definite Gram",
+      "passed": true
+    },
+    {
+      "name": "P5 weighted example coefficients",
+      "passed": true
+    },
+    {
+      "name": "P5 weighted orthogonality",
+      "passed": true
+    },
+    {
+      "name": "P6 coefficients",
+      "passed": true
+    },
+    {
+      "name": "P6 minimum error",
+      "passed": true
+    },
+    {
+      "name": "P6 Taylor error",
+      "passed": true
+    },
+    {
+      "name": "P6 projection orthogonality",
+      "passed": true
+    },
+    {
+      "name": "P6 beats Taylor",
+      "passed": true
+    }
+  ]
+}

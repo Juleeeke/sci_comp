@@ -1,0 +1,18 @@
+{
+  "date": "2026-10-06",
+  "pdf_pages": 14,
+  "pdf_size_bytes": 5676010,
+  "pdf_sha256": "44ce53caed5d26177cfd14b1a13da98d06e3ca86dd3539d01bede64b8832bea8",
+  "a4_all_pages": true,
+  "numeric_checks_passed": 22,
+  "numeric_checks_total": 22,
+  "all_512_k_metrics": true,
+  "original_handout_unchanged": true,
+  "render_review": "All pages inspected via contact sheet; equations, Chinese text, figures, tables and code blocks checked.",
+  "latex_overfull_boxes": false,
+  "pdf_replacement_characters": false,
+  "compiler": "Tectonic 0.17.0, bundled local executable",
+  "compiler_note": "Bundled lineno.sty reports a UTF-8 warning in a package comment; no missing characters or replacement glyphs found in PDF.",
+  "native_editor_compile": "Initial dependency download timed out; multi-file PDF successfully compiled using local CLI.",
+  "cover_update": "Title only; pages 2–14 verified pixel-identical to prior PDF."
+}

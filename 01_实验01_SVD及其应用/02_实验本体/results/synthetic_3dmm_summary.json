@@ -1,0 +1,30 @@
+{
+  "source": "synthetic parametric surface, NOT real human scans or BFM",
+  "train": 160,
+  "test": 40,
+  "vertices": 1280,
+  "dimensions": 3840,
+  "generative_modes": 6,
+  "metrics": [
+    {
+      "k": 1,
+      "test_rmse": 0.03654624737582412
+    },
+    {
+      "k": 2,
+      "test_rmse": 0.03130014231480125
+    },
+    {
+      "k": 3,
+      "test_rmse": 0.022891687154748923
+    },
+    {
+      "k": 5,
+      "test_rmse": 0.005568749028814002
+    },
+    {
+      "k": 6,
+      "test_rmse": 5.36210758738794e-16
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "run_date": "2026-10-06",
+  "seed": 20260917,
+  "python": "3.13.7",
+  "platform": "macOS-27.0-arm64-arm-64bit-Mach-O",
+  "numpy": "2.5.3",
+  "scipy": "1.18.1",
+  "matplotlib": "3.11.2",
+  "pillow": "12.3.0",
+  "elapsed_seconds": 2.1850481033325195,
+  "checks_passed": 22,
+  "checks_total": 22
+}

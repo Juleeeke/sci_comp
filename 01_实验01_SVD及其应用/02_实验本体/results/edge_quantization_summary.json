@@ -1,0 +1,17 @@
+{
+  "k": 32,
+  "raw_frame_uint8_bytes": 10304,
+  "coefficient_payload_bytes": 32,
+  "shared_model_raw_bytes": 1360384,
+  "shared_model_npz_bytes": 1362124,
+  "basis_sha256": "0f0209f72081d0a0171a71b19bbd7f7ceab12350ea3ba6723e9141fb451f4755",
+  "float_psnr_db": 21.44208937250024,
+  "int8_psnr_db": 21.441347720104908,
+  "psnr_loss_db": 0.0007416523953338583,
+  "max_pixel_difference": 0.021110823541490187,
+  "clipped_coefficient_fraction": 0.00234375,
+  "int8_recognition_accuracy": 0.9666666666666667,
+  "raw_payload_ratio": 322.0,
+  "break_even_frames": 133,
+  "first_120_frames_ratio": 0.9063614186526553
+}

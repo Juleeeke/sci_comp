@@ -1,0 +1,19 @@
+note: Running TeX ...
+warning: accessing absolute path `/System/Library/Fonts/Supplemental/Times New Roman.ttf`; build may not be reproducible in other environments
+warning: accessing absolute path `/System/Library/Fonts/Supplemental/Times New Roman Bold.ttf`; build may not be reproducible in other environments
+warning: accessing absolute path `/System/Library/Fonts/Supplemental/Times New Roman Italic.ttf`; build may not be reproducible in other environments
+warning: accessing absolute path `/System/Library/Fonts/Supplemental/Times New Roman Bold Italic.ttf`; build may not be reproducible in other environments
+warning: accessing absolute path `/System/Library/Fonts/Supplemental/Courier New.ttf`; build may not be reproducible in other environments
+warning: accessing absolute path `/System/Library/Fonts/Supplemental/Courier New Bold.ttf`; build may not be reproducible in other environments
+warning: accessing absolute path `/System/Library/Fonts/Supplemental/Courier New Italic.ttf`; build may not be reproducible in other environments
+warning: accessing absolute path `/System/Library/Fonts/Supplemental/Courier New Bold Italic.ttf`; build may not be reproducible in other environments
+warning: lineno.sty:296: Invalid UTF-8 byte or sequence at line 296 replaced by U+FFFD.
+warning: main.tex:33: Overfull \hbox (1.26808pt too wide) in paragraph at lines 32--33
+note: Rerunning TeX because "main.aux" changed ...
+warning: lineno.sty:296: Invalid UTF-8 byte or sequence at line 296 replaced by U+FFFD.
+warning: main.tex:33: Overfull \hbox (1.26808pt too wide) in paragraph at lines 32--33
+warning: warnings were issued by the TeX engine; use --print and/or --keep-logs for details.
+note: Running xdvipdfmx ...
+note: Writing `main.pdf` (5.194369316101074 MiB)
+note: Writing `main.log` (26.2294921875 KiB)
+note: Skipped writing 2 intermediate files (use --keep-intermediates to keep them)

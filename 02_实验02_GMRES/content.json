@@ -1,0 +1,440 @@
+{
+  "title": "GMRES for Large Sparse Linear Systems",
+  "environment": "macOS on Apple Silicon; Python with NumPy and SciPy; Matplotlib for plots. AI assistance: Codex. Exact package versions and measured results are archived with the experiment.",
+  "objectives": "Solve the three supplied sparse systems with Gauss Seidel, restarted GMRES and ILU GMRES. Solve the boundary value problem on grids of 50, 100 and 200 subintervals. Compare true residuals, solution errors, time and convergence order.",
+  "summary": "All six prescribed cases were run. Gauss Seidel diverges for Experiment 1.2. All GMRES and ILU GMRES runs meet the true relative residual target of 1e-11. The finite difference solution exhibits second order convergence.",
+  "conclusions": "ILU reduces iteration counts substantially on these sparse matrices. Timings include monitoring and depend on this implementation and machine. Discretization error and algebraic solver error are assessed separately.",
+  "pages": [
+    {
+      "title": "1 Methods and matrix conventions",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "The three supplied linear systems use the exact solution consisting entirely of ones; their right hand sides are formed by sparse multiplication. All solvers start at zero and use the same true relative residual stopping target. The implementation is compared with SciPy GMRES and a sparse direct solve. No dense matrix inverse is formed."
+        },
+        {
+          "kind": "eq",
+          "latex": "r_k=b-Ax_k,\\qquad \\frac{\\|r_k\\|_2}{\\|b\\|_2}\\leq 10^{-11},\\qquad e_k=\\|x_k-x_*\\|_2."
+        },
+        {
+          "kind": "h",
+          "text": "Stationary iteration and Krylov minimization"
+        },
+        {
+          "kind": "eq",
+          "latex": "A=D+L+U,\\qquad (D+L)x_{k+1}=b-Ux_k."
+        },
+        {
+          "kind": "p",
+          "text": "Gauss Seidel uses a sparse triangular solve per sweep. Divergence is reported when the residual exceeds its initial value by a factor of 1e12. Restarted GMRES uses 30 Arnoldi vectors, two modified Gram Schmidt passes, and a small least squares solve at each inner iteration. The iteration cap is 10000 for both algorithms."
+        },
+        {
+          "kind": "eq",
+          "latex": "AM^{-1}V_k=V_{k+1}\\overline{H}_k,\\qquad x_k=x_{\\mathrm{base}}+M^{-1}V_ky_k."
+        },
+        {
+          "kind": "eq",
+          "latex": "y_k=\\arg\\min_y\\|\\beta e_1-\\overline{H}_ky\\|_2,\\qquad \\beta=\\|b-Ax_{\\mathrm{base}}\\|_2."
+        },
+        {
+          "kind": "p",
+          "text": "The teaching code applies right preconditioning: M is the incomplete LU factorization and M inverse is applied by triangular solves. Unpreconditioned GMRES uses the identity. ILU uses drop tolerance 1e-4, fill factor 10 and natural ordering. SciPy uses its own left preconditioned interface; both implementations are compared using the original residual and final solution, rather than requiring identical iteration histories."
+        },
+        {
+          "kind": "h",
+          "text": "Measurement protocol"
+        },
+        {
+          "kind": "p",
+          "text": "Five independent repeats are timed per method and case. Tables report the median total time including ILU setup, triangular splitting and all residual/error sampling. Curves show solve time only, from the repeat whose total time is the median. Python overhead and repeated least squares solves influence the measured ranking; these are laboratory timings, not a benchmark of optimized implementations."
+        }
+      ]
+    },
+    {
+      "title": "2 Experiment 1.1 results",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "The 300 by 300 tridiagonal matrix has diagonal 61.0001, lower diagonal 35 and upper diagonal 25. Its rows are strictly diagonally dominant because 61.0001 exceeds 35 + 25. This supports Gauss Seidel convergence. The asymmetry is retained exactly."
+        },
+        {
+          "kind": "eq",
+          "latex": "A_{ii}=61.0001,\\quad A_{i,i-1}=35,\\quad A_{i,i+1}=25,\\quad b=A\\mathbf{1}."
+        },
+        {
+          "kind": "table",
+          "headers": [
+            "Method",
+            "Iterations",
+            "Relative residual",
+            "Error norm",
+            "Total ms"
+          ],
+          "rows": [
+            [
+              "Gauss-Seidel",
+              "326",
+              "9.745e-12",
+              "1.960e-08",
+              "44.3508"
+            ],
+            [
+              "GMRES",
+              "192",
+              "9.817e-12",
+              "1.432e-08",
+              "15.5926"
+            ],
+            [
+              "ILU-GMRES",
+              "1",
+              "9.840e-17",
+              "6.435e-15",
+              "0.1112"
+            ]
+          ],
+          "size": 9
+        },
+        {
+          "kind": "fig",
+          "path": "02_实验本体/results/figures/1.1.png",
+          "caption": "Measured true residual and error against the prescribed exact solution versus elapsed solve time.",
+          "height": 2.3
+        },
+        {
+          "kind": "p",
+          "text": "ILU is essentially an exact factorization for this uncomplicated band structure and converges in one Krylov step. Its unusually small iteration count should not be generalized to arbitrary sparse systems. The absolute residual for unpreconditioned methods is around 2e-8 because the stopping condition is relative to the large right hand side."
+        }
+      ]
+    },
+    {
+      "title": "3 Experiment 1.2 results",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "Here n = 100. The diagonal is 1 through 100, both adjacent diagonals contain ones, and the two opposite corners equal 100. The displayed interior zeros and ellipses are interpreted as a cyclic tridiagonal pattern. The large corner in the first row removes diagonal dominance."
+        },
+        {
+          "kind": "eq",
+          "latex": "A_{ii}=i,\\quad A_{i,i+1}=A_{i+1,i}=1,\\quad A_{1,n}=A_{n,1}=n."
+        },
+        {
+          "kind": "table",
+          "headers": [
+            "Method",
+            "Iterations",
+            "Relative residual",
+            "Error norm",
+            "Total ms"
+          ],
+          "rows": [
+            [
+              "Gauss-Seidel",
+              "7",
+              "1.639e+13",
+              "1.572e+14",
+              "0.9810"
+            ],
+            [
+              "GMRES",
+              "91",
+              "9.227e-12",
+              "2.767e-09",
+              "7.0558"
+            ],
+            [
+              "ILU-GMRES",
+              "2",
+              "1.310e-14",
+              "1.945e-12",
+              "0.1317"
+            ]
+          ],
+          "size": 9
+        },
+        {
+          "kind": "fig",
+          "path": "02_实验本体/results/figures/1.2.png",
+          "caption": "Measured true residual and error against the prescribed exact solution versus elapsed solve time.",
+          "height": 2.3
+        },
+        {
+          "kind": "p",
+          "text": "Gauss Seidel triggers the divergence guard after seven sweeps; its large terminal residual is not a converged answer. GMRES and ILU GMRES meet the same residual criterion. The existence of a solution does not guarantee convergence of a stationary splitting. The figure retains the failed trajectory so the comparison does not hide the unstable method."
+        }
+      ]
+    },
+    {
+      "title": "4 Experiment 1.3 results",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "The printed ellipses are interpreted as constant bands: diagonal 4, adjacent diagonals 2, second adjacent diagonals 1, and a third lower diagonal of 1. The two unusual printed entries A(2,n) = 2 and A(n,2) = 3 are retained. All unspecified entries are zero. This explicit convention is essential because a different completion of the ellipses defines a different problem."
+        },
+        {
+          "kind": "eq",
+          "latex": "A_{ii}=4,\\quad A_{i,i\\pm1}=2,\\quad A_{i,i\\pm2}=1,\\quad A_{i,i-3}=1."
+        },
+        {
+          "kind": "table",
+          "headers": [
+            "Method",
+            "Iterations",
+            "Relative residual",
+            "Error norm",
+            "Total ms"
+          ],
+          "rows": [
+            [
+              "Gauss-Seidel",
+              "119",
+              "9.704e-12",
+              "2.684e-09",
+              "16.2934"
+            ],
+            [
+              "GMRES",
+              "61",
+              "9.756e-12",
+              "8.226e-10",
+              "4.6607"
+            ],
+            [
+              "ILU-GMRES",
+              "3",
+              "3.547e-16",
+              "6.116e-15",
+              "0.2514"
+            ]
+          ],
+          "size": 9
+        },
+        {
+          "kind": "fig",
+          "path": "02_实验本体/results/figures/1.3.png",
+          "caption": "Measured true residual and error against the prescribed exact solution versus elapsed solve time.",
+          "height": 2.3
+        },
+        {
+          "kind": "p",
+          "text": "The matrix is nonsymmetric under the stated band and corner convention. Gauss Seidel converges here even though strict diagonal dominance is unavailable as a sufficient test. ILU reduces the Krylov iteration count from 61 to 3. Agreement with the sparse direct solution and the all ones exact vector checks the actual assembled system."
+        }
+      ]
+    },
+    {
+      "title": "5 Boundary value problem and discretization",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "The handout supplies the exact solution u(x) = exp(x) + cos(pi x), endpoints u(0) = 2 and u(1) = e - 1, and an equation whose leading derivative is read as differentiation with respect to x. This is confirmed by substitution of the supplied exact solution and forcing."
+        },
+        {
+          "kind": "eq",
+          "latex": "u^{\\prime\\prime}-(1+x)^2u^{\\prime}-e^{-x}u=f(x),\\qquad 0<x<1."
+        },
+        {
+          "kind": "eq",
+          "latex": "f(x)=[1-(1+x)^2]e^x-\\pi^2\\cos(\\pi x)+\\pi(1+x)^2\\sin(\\pi x)-1-e^{-x}\\cos(\\pi x)."
+        },
+        {
+          "kind": "p",
+          "text": "Let h = 1/N and x_i = i h. Centered second and first differences have truncation error of order h squared for this smooth solution. Multiplication by 2 h squared gives the displayed tridiagonal system."
+        },
+        {
+          "kind": "eq",
+          "latex": "(2+hp_i)u_{i-1}-(4+2h^2e^{-x_i})u_i+(2-hp_i)u_{i+1}=2h^2f(x_i),\\quad p_i=(1+x_i)^2."
+        },
+        {
+          "kind": "eq",
+          "latex": "F_1=2h^2f(x_1)-(2+hp_1)\\,2."
+        },
+        {
+          "kind": "eq",
+          "latex": "F_{N-1}=2h^2f(x_{N-1})-(2-hp_{N-1})(e-1)."
+        },
+        {
+          "kind": "p",
+          "text": "Only the N - 1 interior values are unknown. The boundary contributions are moved to the right hand side with a minus sign. The exact endpoints are reattached for the full grid. The sparse matrices, right hand sides, exact interior vectors and computed solutions are saved so the indexing and boundary correction can be audited."
+        },
+        {
+          "kind": "eq",
+          "latex": "E_\\infty=\\max_{1\\leq i<N}|u_i-u(x_i)|,\\qquad E_{2,h}=\\left(h\\sum_{i=1}^{N-1}|u_i-u(x_i)|^2\\right)^{1/2}."
+        },
+        {
+          "kind": "p",
+          "text": "These grid errors compare with the continuous exact solution and therefore include discretization error. A separate direct solution of the same discrete system isolates the algebraic reference. Small residual alone does not imply equally small error, especially as conditioning worsens with mesh refinement."
+        }
+      ]
+    },
+    {
+      "title": "6 Boundary value results and convergence",
+      "blocks": [
+        {
+          "kind": "table",
+          "headers": [
+            "N",
+            "Method",
+            "Steps",
+            "Rel res",
+            "Max error",
+            "L2 h error",
+            "Total ms"
+          ],
+          "rows": [
+            [
+              "50",
+              "GMRES",
+              "298",
+              "9.64e-12",
+              "4.97357e-04",
+              "3.28999e-04",
+              "20.615"
+            ],
+            [
+              "50",
+              "ILU-GMRES",
+              "1",
+              "7.72e-16",
+              "4.97356e-04",
+              "3.28998e-04",
+              "0.102"
+            ],
+            [
+              "100",
+              "GMRES",
+              "915",
+              "1.00e-11",
+              "1.24310e-04",
+              "8.22306e-05",
+              "66.928"
+            ],
+            [
+              "100",
+              "ILU-GMRES",
+              "1",
+              "1.09e-15",
+              "1.24307e-04",
+              "8.22284e-05",
+              "0.074"
+            ],
+            [
+              "200",
+              "GMRES",
+              "3207",
+              "9.95e-12",
+              "3.10840e-05",
+              "2.05623e-05",
+              "246.550"
+            ],
+            [
+              "200",
+              "ILU-GMRES",
+              "1",
+              "1.86e-15",
+              "3.10747e-05",
+              "2.05558e-05",
+              "0.102"
+            ]
+          ],
+          "size": 8
+        },
+        {
+          "kind": "fig",
+          "path": "02_实验本体/results/figures/convergence.png",
+          "caption": "Grid error decreases quadratically as h is halved. Curves of both solvers nearly coincide.",
+          "height": 2.5
+        },
+        {
+          "kind": "p",
+          "text": "GMRES maximum norm observed orders are 2.000338, 1.999697. The order is computed as log base two of consecutive error ratios. Both norms and both solvers give approximately second order convergence."
+        },
+        {
+          "kind": "p",
+          "text": "ILU-GMRES maximum norm observed orders are 2.000371, 2.000093. The order is computed as log base two of consecutive error ratios. Both norms and both solvers give approximately second order convergence."
+        },
+        {
+          "kind": "p",
+          "text": "The ILU solve takes one Krylov step for each tridiagonal grid system. Unpreconditioned iteration counts grow strongly under refinement. Because the algebraic tolerance is sufficiently small, further residual reduction does not materially improve the leading finite difference error."
+        }
+      ]
+    },
+    {
+      "title": "7 Boundary value iteration histories",
+      "blocks": [
+        {
+          "kind": "fig",
+          "path": "02_实验本体/results/figures/2.1_N_50.png",
+          "caption": "N = 50: residual and Euclidean grid error against the continuous exact solution.",
+          "height": 1.75
+        },
+        {
+          "kind": "fig",
+          "path": "02_实验本体/results/figures/2.1_N_100.png",
+          "caption": "N = 100: residual and Euclidean grid error against the continuous exact solution.",
+          "height": 1.75
+        },
+        {
+          "kind": "fig",
+          "path": "02_实验本体/results/figures/2.1_N_200.png",
+          "caption": "N = 200: residual and Euclidean grid error against the continuous exact solution.",
+          "height": 1.75
+        },
+        {
+          "kind": "p",
+          "text": "A residual continues decreasing after the grid error approaches the discretization floor. The error need not decrease monotonically because GMRES minimizes the residual in its search space, not the error against the continuous solution. ILU setup is excluded from the horizontal axes but included in total time tables."
+        }
+      ]
+    },
+    {
+      "title": "8 Verification and reproduction",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "The numerical verification script passes 10 of 10 checks covering case coverage, direct residuals, the expected divergence, solver convergence, SciPy agreement, time history consistency, and second order grid convergence in both norms. A separate delivery audit checks saved solutions against their sparse matrices and right hand sides."
+        },
+        {
+          "kind": "table",
+          "headers": [
+            "Environment",
+            "Recorded value"
+          ],
+          "rows": [
+            [
+              "python",
+              "3.13.7"
+            ],
+            [
+              "numpy",
+              "2.5.3"
+            ],
+            [
+              "scipy",
+              "1.18.1"
+            ],
+            [
+              "machine",
+              "arm64"
+            ],
+            [
+              "platform",
+              "macOS-27.0-arm64-arm-64bit-Mach-O"
+            ]
+          ],
+          "size": 9
+        },
+        {
+          "kind": "p",
+          "text": "From the package root, run python reproduce.py to regenerate numerical results, verification, figures, report content, the LaTeX PDF and the editable Word document. See README.md for the individual commands and directory layout. The final PDF is compiled from LaTeX before Word generation; the Word document uses native editable Office equations."
+        },
+        {
+          "kind": "p",
+          "text": "The implementation records true residuals explicitly and cross checks SciPy GMRES with its own interface. A mismatch in iteration counts between left and right preconditioning is not itself a contradiction. Timings are measured locally and include instrumentation overhead; no claim is made about device deployment or production solver performance."
+        },
+        {
+          "kind": "p",
+          "text": "Source: the supplied two page course handout, preserved byte for byte in source. Experiment 1.3 uses the explicit band completion stated in Section 4; the derivative variable in the boundary value problem is taken as x to match the supplied exact solution. These are the only transcription conventions affecting the numerical model."
+        }
+      ]
+    }
+  ]
+}

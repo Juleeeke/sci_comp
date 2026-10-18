@@ -1,0 +1,287 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=22mm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,array,xcolor,pict2e}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[bookmarks=false]{hyperref}
+\hypersetup{colorlinks=true,linkcolor=bluefit,urlcolor=bluefit,pdftitle={Lab 3: Applications of Least Squares and Best Square Approximation}}
+\definecolor{bluefit}{RGB}{28,96,153}
+\definecolor{orangefit}{RGB}{191,81,20}
+\definecolor{gridgray}{RGB}{217,222,228}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\setlength{\textfloatsep}{10pt}
+\setlength{\intextsep}{9pt}
+\renewcommand{\arraystretch}{1.13}
+\setlength{\tabcolsep}{5pt}
+\newcommand{\RSS}{\operatorname{RSS}}
+\newcommand{\R}{\mathbb{R}}
+\begin{document}
+\pagenumbering{gobble}
+\begin{titlepage}
+\centering
+\vspace*{45mm}
+{\Huge\bfseries Lab 3\par}
+\vspace{10mm}
+{\LARGE Applications of Least Squares\par}
+\vspace{4mm}
+{\LARGE and Best Square Approximation\par}
+\end{titlepage}
+\pagenumbering{arabic}
+\fontsize{10}{12}\selectfont
+
+\section{Objectives, data and computational method}
+This report completes Experiments 1.1--1.3, 2.1--2.3 and 3.1 of the supplied Lab 3 handout. The tasks cover an overdetermined system, a straight-line fit, two population models, three continuous projections, and separate fits of the RAE2822 airfoil surfaces.
+
+All five discrete points, 24 population observations (1790--2020, in millions), and 129 airfoil coordinates are transcribed from the supplied handout. The original PDF and Markdown files are preserved. No external population series, synthetic airfoil coordinates or replacement data are used.
+
+\subsection{Discrete least squares and its numerical implementation}
+For a full-column-rank design matrix $A\in\R^{m\times n}$, minimize
+\[
+J(c)=\|b-Ac\|_2^2,\qquad
+\nabla J(c)=-2A^T(b-Ac)=0.
+\]
+Thus $A^TAc=A^Tb$. The residual convention throughout is $r=b-Ac$, and $\RSS=r^Tr$. The normal equations are solved by an explicitly implemented Gaussian elimination algorithm with partial pivoting. A separately implemented Householder QR method supplies the primary numerical fits. With $A=Q[R^T\;0]^T$, it solves $Rc=(Q^Tb)_{1:n}$ without forming $A^TA$.
+
+The QR routine constructs each reflector as $H=I-2vv^T/(v^Tv)$, with the sign chosen to avoid cancellation, applies it to the remaining columns and right-hand side, and back-substitutes. Both implementations are compared with \texttt{numpy.linalg.lstsq}; independent SciPy LAPACK and exact rational calculations are used for verification. All assigned designs have full column rank. The code never forms an explicit matrix inverse.
+
+Forming $A^TA$ squares the two-norm condition number in exact arithmetic. QR is therefore preferable for ill-conditioned fits. The population calculation uses $t=\text{year}-1790$ in years and $u=t/100$ in centuries to reduce design-matrix conditioning. Reported growth parameters are converted back to yearly units.
+
+\subsection{Continuous best square approximation}
+For $p=\sum_jc_j\phi_j$, minimizing $\int_a^b(f-p)^2\,dx$ gives the Gram system
+\[
+Gc=h,\qquad G_{ij}=\int_a^b\phi_i\phi_j\,dx,\quad
+h_i=\int_a^bf\phi_i\,dx.
+\]
+The optimum is characterized by $\langle f-p,\phi_i\rangle=0$. An orthogonal basis makes $G$ diagonal. This continuous integral objective differs from a discrete RSS on sampled values; uniform weight is used in both settings unless otherwise stated.
+
+\subsection{Source ambiguity in Experiment 1.1}
+The third equation in both the PDF and Markdown reads $x_1+x_2+2x_2=2$. Its literal coefficient row is $(1,3,0)$. This is the primary interpretation here. A possible intended reading, $x_1+x_2+2x_3=2$, is also solved explicitly on the next page. It is labeled an alternative and is not presented as a confirmed correction.
+
+\clearpage
+\section{Experiment 1.1: an overdetermined system}
+\subsection{Literal reading of the supplied equation}
+The matrix and right-hand side are
+\[
+A=\begin{bmatrix}1&2&4\\2&1&1\\1&3&0\\1&-1&-2\end{bmatrix},
+\qquad b=\begin{bmatrix}-1\\4\\2\\1\end{bmatrix}.
+\]
+Forming the normal equations gives
+\[
+@@L_GRAM@@c=@@L_RHS@@.
+\]
+Exact rational elimination and numerical QR give
+\[
+c=\frac1{890}\begin{bmatrix}1354\\203\\-449\end{bmatrix}
+=@@L_X@@.
+\]
+The residual and its sum of squares are
+\[
+r=\frac1{890}\begin{bmatrix}-854\\1098\\-183\\-1159\end{bmatrix}
+=@@L_R@@,
+\qquad \RSS=@@L_RSS@@.
+\]
+The residual is nonzero because the four equations are inconsistent. It satisfies $A^Tr=0$ to floating-point precision, so no perturbation in the column space can reduce its squared norm. The full column rank guarantees a unique minimizer.
+
+\subsection{Alternative reading: replace only the final subscript in row three}
+If the intended third row is $(1,1,2)$, the normal equations instead become
+\[
+@@A_GRAM@@c=@@A_RHS@@.
+\]
+Their solution, residual and RSS are
+\[
+c=\begin{bmatrix}1\\9/2\\-5/2\end{bmatrix},\qquad
+r=\begin{bmatrix}-1\\0\\3/2\\-1/2\end{bmatrix},\qquad
+\RSS=\frac72=@@A_RSS@@.
+\]
+These are solutions of two different input systems. The smaller RSS for the alternative does not establish that it is the intended equation; the original source remains ambiguous.
+
+\clearpage
+\section{Experiment 1.2: fitting a straight line}
+Set $p(x)=c_0+c_1x$. The design matrix has rows $(1,x_i)$, so the normal equations are
+\[
+\begin{bmatrix}5&151\\151&4629\end{bmatrix}
+\begin{bmatrix}c_0\\c_1\end{bmatrix}
+=\begin{bmatrix}720\\22240\end{bmatrix}.
+\]
+Solving gives
+\[
+\boxed{p(x)=-\frac{3170}{43}+\frac{310}{43}x
+=-73.72093023+7.209302326x.}
+\]
+\begin{center}
+\begin{tabular}{rrrr}\toprule
+$x_i$ & $y_i$ & $p(x_i)$ & $y_i-p(x_i)$\\\midrule
+@@LINE_TABLE@@
+\bottomrule\end{tabular}
+\end{center}
+Consequently,
+\[
+\boxed{\RSS=\frac{4050}{43}=@@LINE_RSS@@.}
+\]
+Here $\sum_i r_i=0$ and $\sum_i x_i r_i=0$, as required by the constant and linear columns of the design. The slope describes the trend over the observed range; the negative intercept should not be interpreted as a physically meaningful value outside that range.
+@@LINE_PLOT@@
+
+\clearpage
+\section{Experiment 1.3: U.S. population models}
+\subsection{Linearization and parameter units}
+Let $P_i$ be the supplied population in millions and $t_i=\text{year}_i-1790$. For the constant-rate model,
+\[
+P(t)=P_0e^{rt},\qquad \ln P=a+rt,\quad a=\ln P_0.
+\]
+For the variable-rate model,
+\[
+P(t)=P_0e^{r_0t-r_1t^2/2},\qquad \ln P=a+r_0t-\frac{r_1}{2}t^2.
+\]
+Using $u=t/100$, fit $\ln P=\beta_0+\beta_1u$ or $\ln P=\beta_0+\beta_1u+\beta_2u^2$ by linear least squares. The conversion is $P_0=e^{\beta_0}$, $r=\beta_1/100$, or $r_0=\beta_1/100$ and $r_1=-2\beta_2/10000$. The initial value $P_0$ is fitted; it is not fixed at the first observation.
+\begin{align*}
+\widehat P_{\mathrm{constant}}(t)&=@@POP_EXP@@,\\
+\widehat P_{\mathrm{variable}}(t)&=@@POP_VAR@@.
+\end{align*}
+The fitted variable-rate coefficient is $r_1=@@R1@@\ \mathrm{year}^{-2}$. Thus $d\ln P/dt=r_0-r_1t$ decreases over the observed period.
+
+\subsection{Observed and fitted values}
+\begin{center}\small
+\begin{tabular}{rrrr}\toprule
+Year & Observed (million) & Constant rate & Variable rate\\\midrule
+@@POP_ROWS@@
+\bottomrule\end{tabular}
+\end{center}
+
+\clearpage
+\subsection{Graphical comparison and error criteria}
+@@POP_PLOT@@
+\begin{center}\small
+\begin{tabular}{lrrrr}\toprule
+Model & Log RSS & Population RSS & RMSE & Max. error\\\midrule
+@@POP_METRICS@@
+\bottomrule\end{tabular}
+\end{center}
+Population RSS has units of million squared; RMSE and maximum absolute error are in millions. The minimized objective is $\sum_i[\ln P_i-\ln\widehat P_i]^2$, not $\sum_i(P_i-\widehat P_i)^2$. For small discrepancies, log residuals approximate relative errors. A nonlinear least-squares fit directly on population values would generally produce different parameters.
+@@POP_RESIDUAL_PLOT@@
+The quadratic log model reduces log RSS by @@LOG_REDUCTION@@\% and also improves error on the original population scale for these observations. The reduced log RSS is partly expected because the constant-rate model is nested within the quadratic model. This is an in-sample comparison, not a validation of future forecasts. Neither fit is extrapolated beyond 2020; a linearly declining growth rate is a descriptive assumption, not a demographic law.
+
+\clearpage
+\section{Experiments 2.1 and 2.2: continuous projections}
+\subsection{Experiment 2.1: best line for $x^2$ on $[0,1]$}
+The error functional, after expansion and integration, is
+\[
+E(c_0,c_1)=\frac15-\frac23c_0-\frac12c_1+c_0^2+c_0c_1+\frac13c_1^2.
+\]
+Setting both partial derivatives to zero yields
+\[
+2c_0+c_1=\frac23,\qquad c_0+\frac23c_1=\frac12,
+\quad\text{or}\quad
+\begin{bmatrix}1&1/2\\1/2&1/3\end{bmatrix}
+\begin{bmatrix}c_0\\c_1\end{bmatrix}
+=\begin{bmatrix}1/3\\1/4\end{bmatrix}.
+\]
+Therefore
+\[
+\boxed{p(x)=x-\frac16},\qquad
+\boxed{\|x^2-p\|_2^2=\int_0^1(x^2-x+1/6)^2\,dx=\frac1{180}.}
+\]
+The two residual moments vanish: $\int_0^1(x^2-x+1/6)\,dx=0$ and $\int_0^1x(x^2-x+1/6)\,dx=0$.
+@@SQUARE_PLOT@@
+\subsection{Experiment 2.2: projection of $x^3$ onto $P_0,P_1,P_2$}
+The squared norms are $2$, $2/3$ and $2/5$. Parity gives
+\[
+\langle x^3,P_0\rangle=0,\quad
+\langle x^3,P_1\rangle=\int_{-1}^1x^4\,dx=\frac25,\quad
+\langle x^3,P_2\rangle=0.
+\]
+Hence $a_j=\langle f,P_j\rangle/\|P_j\|_2^2$ gives
+\[
+(a_0,a_1,a_2)=(0,3/5,0),\qquad
+\boxed{p_2=0P_0+\frac35P_1+0P_2=\frac35x.}
+\]
+As a further check, $x^3=(2/5)P_3+(3/5)P_1$, so the omitted component is $(2/5)P_3$. Its squared norm is $(4/25)(2/7)=8/175$. A best approximation from a quadratic space can have degree one.
+
+\clearpage
+\section{Experiment 2.3: quadratic approximation of $\sin(\pi x)$}
+With $p=c_0+c_1x+c_2x^2$, the Gram system is
+\[
+\begin{bmatrix}2&0&2/3\\0&2/3&0\\2/3&0&2/5\end{bmatrix}
+\begin{bmatrix}c_0\\c_1\\c_2\end{bmatrix}
+=\begin{bmatrix}0\\2/\pi\\0\end{bmatrix}.
+\]
+The right-hand side follows from parity and integration by parts:
+\[
+\int_{-1}^1x\sin(\pi x)\,dx
+=\left[-\frac{x\cos(\pi x)}{\pi}+\frac{\sin(\pi x)}{\pi^2}\right]_{-1}^1
+=\frac2\pi.
+\]
+Because $\sin(\pi x)$ is odd, its inner products with the even basis functions $1,x^2$ vanish. The corresponding even Gram block is positive definite, so $c_0=c_2=0$. The middle equation gives $c_1=3/\pi$, and
+\[
+\boxed{p_2(x)=\frac3\pi x\approx0.9549296586x.}
+\]
+Using projection orthogonality, the minimum squared error is
+\[
+\|\sin(\pi x)-p_2\|_2^2=\|\sin(\pi x)\|_2^2-\|p_2\|_2^2
+=1-\frac6{\pi^2}=@@SINE_ERROR@@.
+\]
+The Taylor polynomial through degree two at zero is $T_2(x)=\pi x$ because both even coefficients vanish. Its integrated squared error is
+\[
+\int_{-1}^1[\sin(\pi x)-\pi x]^2\,dx
+=1-4+\frac{2\pi^2}{3}=@@TAYLOR_ERROR@@.
+\]
+@@SINE_PLOT@@
+The Taylor slope matches the derivative at zero, while the projection slope balances the error over $[-1,1]$. The two methods optimize different criteria; local derivative matching does not minimize the global $L^2$ error.
+
+\clearpage
+\section{Experiment 3.1: RAE2822 airfoil fitting}
+The 129 rows traverse the lower surface from the trailing edge to the leading edge, then the upper surface back to the trailing edge. Split at the minimum-$x$ row (zero-based index 64), include that leading-edge point in both surfaces, and reverse the first segment to obtain increasing $x$. Each surface has 65 samples. Splitting by the sign of $y$ would be incorrect because part of the lower curve has positive $y$ near the trailing edge.
+
+Use all four supplied functions ($N=4$): $g_1=\sqrt{x}-x$, $g_2=x(1-x)$, $g_3=x^2(1-x)$ and $g_4=x^3(1-x)$. For each surface, $B_{ji}=g_i(x_j)$ and
+\[
+\alpha=\arg\min_{a\in\R^4}\sum_{j=1}^{65}\left[y_j-\sum_{i=1}^4a_i g_i(x_j)\right]^2.
+\]
+All points have equal weight; this discrete objective is not an arc-length-weighted continuous fit. All $g_i$ vanish at $0$ and $1$, enforcing both endpoint ordinates exactly. The two endpoint rows contribute zero residual and do not alter the coefficients.
+\begin{center}\footnotesize
+\begin{minipage}[t]{.45\textwidth}\centering
+\begin{tabular}{crr}\toprule
+Coefficient & Upper surface & Lower surface\\\midrule
+@@AIR_COEFFS@@
+\bottomrule\end{tabular}\end{minipage}\hfill
+\begin{minipage}[t]{.53\textwidth}\centering
+\begin{tabular}{lrrrr}\toprule
+Surface & $m$ & RSS & RMSE & Max. $|r|$\\\midrule
+@@AIR_METRICS@@
+\bottomrule\end{tabular}\end{minipage}
+\end{center}
+@@AIR_PLOT@@
+@@AIR_RES_PLOT@@
+The fitted curves follow the supplied profile closely. The lower surface has the larger residual; increasing numerical precision does not remove the limitation of the four-function model. The original 129 input rows, both fitted surfaces and all pointwise residuals are retained in CSV files.
+
+\clearpage
+\section{Numerical comparison, verification and conclusions}
+\subsection{Explicit algorithms versus NumPy}
+The differences below are the maximum absolute coefficient differences against \texttt{numpy.linalg.lstsq}. All values refer to the same design and objective. Population rows use the scaled variable $u$; differences are in those fitted coefficients.
+\begin{center}\small
+\begin{tabular}{lrrrr}\toprule
+Case & $\kappa_2(A)$ & $\kappa_2(A^TA)$ & QR difference & Normal difference\\\midrule
+@@CHECK_TABLE@@
+\bottomrule\end{tabular}
+\end{center}
+The explicit methods agree with NumPy to floating-point precision. The agreement of normal-equation solutions does not imply stability for all problems. For the quadratic log-population design, rescaling $t$ to $u=t/100$ reduces $\kappa_2(A)$ from about @@COND_RAW@@ to @@COND_SCALED@@. The Legendre Gram matrix is diagonal, while the monomial Gram matrix couples even terms; both express the same projection principle.
+
+\subsection{Verification and limitations}
+All @@CHECK_COUNT@@ numerical and source-data checks passed. Checks include exact rational solutions for the small discrete systems, orthogonality of every projection, independent 160-node Gauss--Legendre quadrature for continuous errors, separate LAPACK reference fits, full-rank designs, endpoint closure, CSV consistency, and exact agreement of the population and airfoil rows with the source PDF. Source-file SHA-256 hashes are recorded before the experiment. The verification record stores each condition individually.
+
+The original equation ambiguity is retained explicitly. Log-space fitting is distinguished from direct population fitting. The population comparison uses the training observations only, and the airfoil fit uses the coordinates supplied with the assignment without asserting aerodynamic performance. No timing comparison is claimed for these small systems.
+
+\subsection{Reproduction and file guide}
+Run the following commands from the \texttt{lab3} directory using a Python environment with NumPy, SciPy, Matplotlib and PyMuPDF:
+\begin{verbatim}
+../.venv/bin/python experiment/run_experiment.py
+../.venv/bin/python experiment/verify_results.py
+../.venv/bin/python experiment/build_report.py
+bash report/compile.sh
+\end{verbatim}
+The execution used NumPy @@NUMPY@@, SciPy @@SCIPY@@ and Matplotlib @@MATPLOTLIB@@. Detailed runtime versions are in \texttt{experiment/results/results.json}. Input CSV files are in \texttt{experiment/data}; numerical tables and separate PDF/PNG plots are in \texttt{experiment/results}. This report's \texttt{main.tex} embeds its vector plots and can be compiled as one standalone file, including in the Codex LaTeX editor.
+
+Least squares is a projection onto a chosen space. A good implementation must specify that space, its data weights, the residual sign and the error scale. In this lab, QR and orthogonality checks connect the theory to reproducible numerical results; basis selection and the fitting objective govern what those results mean.
+
+\subsection*{Source}
+\textit{Lab 3: Applications of Least Squares and Best Square Approximation}, supplied seven-page course handout, \texttt{2-2-DLSM-BSA--Application--lab.pdf}, with the accompanying Markdown transcription. All task statements and numerical input data come from these supplied files.
+\end{document}

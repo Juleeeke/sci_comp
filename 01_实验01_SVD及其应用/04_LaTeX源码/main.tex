@@ -1,0 +1,396 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[margin=19mm,headheight=14pt]{geometry}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}[Path=/System/Library/Fonts/Supplemental/,Extension=.ttf,UprightFont=*,BoldFont=* Bold,ItalicFont=* Italic,BoldItalicFont=* Bold Italic]
+\setmonofont{Courier New}[Path=/System/Library/Fonts/Supplemental/,Extension=.ttf,UprightFont=*,BoldFont=* Bold,ItalicFont=* Italic,BoldItalicFont=* Bold Italic]
+\usepackage{amsmath,amssymb,booktabs,graphicx,float,tabularx,array,xcolor,fancyhdr,fvextra,hyperref,xurl}
+\hypersetup{colorlinks=true,linkcolor=blue!40!black,urlcolor=blue!40!black,pdftitle={SVD and Its Applications - English Laboratory Report}}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\renewcommand{\arraystretch}{1.16}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{SVD and Its Applications}\fancyhead[R]{Laboratory Report}\fancyfoot[C]{\thepage}
+\DefineVerbatimEnvironment{code}{Verbatim}{fontsize=\small,breaklines=true,frame=single}
+\begin{document}
+\thispagestyle{empty}
+\begin{center}
+{\Large Beihang University\\School of Mathematical Sciences\par}
+\vspace{10mm}
+{\LARGE\bfseries SVD and Its Applications\par}
+\vspace{4mm}{\Large English Laboratory Report\par}
+\vspace{8mm}
+\end{center}
+\begin{tabularx}{\linewidth}{|X|X|}\hline
+Course: Numerical Analysis\newline Computer Laboratory & Experiment: SVD and Its Applications\\\hline
+\multicolumn{2}{|l|}{Experiment type: Comprehensive}\\\hline
+Class: \underline{\hspace{22mm}} & Name: \underline{\hspace{25mm}}\\\hline
+Student ID: \underline{\hspace{22mm}} & Lab date: \underline{\hspace{23mm}}\\\hline
+Instructor: \underline{\hspace{22mm}} & Grade: \underline{\hspace{26mm}}\\\hline
+\end{tabularx}
+\vspace{6mm}
+\textbf{Objectives and experimental content}
+
+Analyze the supplied matrix using SVD, singular vectors, rank-one terms and retained energy. Complete grayscale and RGB low-rank reconstruction, all-rank metrics, diagnostic curves and the three key findings. Investigate Eigenfaces and int8 shared-basis coding; demonstrate 3D and temporal extensions using explicitly labeled simulations.
+
+\textbf{Experimental procedure and results}
+
+The assembled matrix has rank 4 and singular values approximately 100, 10, 0.1 and 0.001. RGB image metrics cover every rank from 1 to 512. The parameter break-even rank is 255.750. Eigenfaces uses 280 training and 120 test images; k=80 gives 118/120 correct (98.33\%). Int8 coefficients use 32 B per frame; total savings begin at 133 frames after counting the shared model. All 22 numerical checks passed.
+
+\textbf{Experimental analysis and summary}
+
+Low-rank SVD balances fidelity and storage. High retained energy can coexist with poor visual detail; parameter ratios differ from byte ratios. Shared bases support recognition and compression but incur model-transfer costs. Synthetic 3D and temporal results are mechanism demonstrations.
+
+\textbf{Environment}
+
+macOS on Apple Silicon; Python, NumPy, SciPy, Matplotlib and Pillow. Codex assisted with implementation and report generation. Exact versions and the execution date are recorded in Section 13. Personal and assessment fields remain blank.
+
+\clearpage
+\section*{1. Objectives, data and matrix construction}
+The experiment investigates singular value decomposition (SVD), optimal low-rank approximation, image compression, and shared-basis representations. All five image tasks in the course handout are implemented: grayscale reconstruction, the RGB rank grid, metrics for every rank, three diagnostic curves, and an evidence-based discussion of the three key findings. The extension covers Eigenfaces, coefficient quantization, a synthetic three-dimensional surface, and synthetic temporal coefficients.
+
+The RGB input is the 512 x 512 astronaut image distributed with scikit-image v0.25.2 (NASA image credit). Pixel values are converted to float64 and divided by 255. Eigenfaces uses the archived AT\&T/ORL database: 400 real grayscale photographs, 40 subjects, and 112 x 92 pixels per image [2, 3]. The original inputs are included with the experiment.
+
+\subsection*{1.1 Assembly and consistency of the supplied matrices}
+The numerical matrix printed in the handout agrees with A = Q5 Sigma Q4, where Q4 acts as V-transpose. The maximum elementwise difference is 3.276e-05; replacing Q4 by its transpose gives a difference of 41.700658. The first discrepancy is consistent with six-decimal input rounding. The main experiment uses the assembled matrix; the printed matrix is retained separately for comparison. Exact input arrays appear in the saved NPZ and Appendix A.
+
+\subsection*{Assembled A (5 x 4)}
+\begin{center}\fontsize{8.5}{10.5}\selectfont\begin{tabular}{@{}llll@{}}\toprule
+Column 1 & Column 2 & Column 3 & Column 4\\\midrule
+-13.026561 & +0.285437 & +5.211156 & +3.325249\\
+-57.568127 & -14.043320 & +37.227236 & +46.963095\\
++21.533442 & +1.506950 & -10.469939 & -9.796990\\
+-28.005110 & -7.765161 & +18.982922 & +24.852919\\
+-8.844262 & -4.251763 & +7.694655 & +11.817520\\
+\bottomrule\end{tabular}\end{center}
+The handout calls Q5 and Q4 positive definite, but these nonsymmetric matrices are approximately orthogonal: their Frobenius orthogonality residuals are 2.284e-06 and 2.176e-06. No reorthogonalization is applied to the given rounded entries.
+
+\subsection*{1.2 Mathematical representation}
+\[A=U\Sigma V^T=\sum_{i=1}^{r}\sigma_i u_i v_i^T,\qquad A_k=\sum_{i=1}^{k}\sigma_i u_i v_i^T.\]
+For a real m x n matrix, reduced SVD returns U of size m x r, V-transpose of size r x n and descending singular values, with r = min(m,n). Retaining the leading k terms gives a best rank-at-most-k approximation in the Frobenius norm. Reduced output is distinct from truncation: full\_matrices=False controls returned shapes; slicing selects k [4].
+
+\clearpage
+\section*{2. Matrix singular values, rank and energy}
+A teaching implementation obtains the eigenpairs of A-transpose A using numpy.linalg.eigh, orders them by descending eigenvalue, takes square roots to obtain singular values, and forms each left vector as A v / sigma. It is cross-checked against numpy.linalg.svd. Forming A-transpose A squares the condition number, so direct SVD is used for the image and face experiments.
+
+\[Av_i=\sigma_i u_i,\quad A^Tu_i=\sigma_i v_i,\quad A^TAv_i=\sigma_i^2v_i,\quad AA^Tu_i=\sigma_i^2u_i.\]
+Because A is rectangular, u and v are singular vectors of A. They are eigenvectors of A A-transpose and A-transpose A, respectively; they are not ordinary eigenvectors of the rectangular matrix itself.
+
+\begin{center}\fontsize{9}{11}\selectfont\begin{tabular}{@{}llll@{}}\toprule
+k & Singular value & Retained energy E(k) & Relative error\\\midrule
+1 & 100.000015319 & 0.990098022738 & 9.951e-02\\
+2 & 10.000004986 & 0.999999009805 & 9.951e-04\\
+3 & 0.099999934 & 0.999999999901 & 9.950e-06\\
+4 & 0.000999999 & 1.000000000000 & 5.811e-16\\
+\bottomrule\end{tabular}\end{center}
+\[E(k)=\frac{\sum_{i\le k}\sigma_i^2}{\sum_i\sigma_i^2},\qquad \frac{\left\|A-A_k\right\|_F}{\left\|A\right\|_F}=\sqrt{1-E(k)}.\]
+All four singular values are nonzero, so A has rank 4 and full column rank. Its two-norm condition number is 100000.071. The first two components retain about 99.999901\% of the energy, but this does not change the exact rank. A-transpose A has four positive eigenvalues, approximately 10000, 100, 0.01 and 0.000001. A A-transpose has one additional zero eigenvalue.
+
+The two implementations differ in singular values by at most 5.487e-11. Summing all four rank-one terms gives a reconstruction residual of 5.975e-14. The measured relative reconstruction error at k=4 is a floating-point residual; the mathematical truncated-SVD tail is exactly zero.
+
+\subsection*{Left and right singular vectors}
+\subsection*{Reduced U: each column is a left singular vector}
+\begin{center}\fontsize{8.5}{10.5}\selectfont\begin{tabular}{@{}llll@{}}\toprule
+Column 1 & Column 2 & Column 3 & Column 4\\\midrule
+-0.130739 & +0.608762 & -0.043819 & -0.780233\\
+-0.842723 & -0.093659 & -0.312900 & +0.107165\\
++0.251167 & -0.638035 & -0.511983 & -0.505413\\
+-0.426363 & -0.217889 & +0.017690 & -0.144392\\
+-0.166897 & -0.407521 & +0.798582 & -0.321653\\
+\bottomrule\end{tabular}\end{center}
+\subsection*{V-transpose: each row transposes to a right singular vector}
+\begin{center}\fontsize{8.5}{10.5}\selectfont\begin{tabular}{@{}llll@{}}\toprule
+Column 1 & Column 2 & Column 3 & Column 4\\\midrule
++0.690420 & +0.161962 & -0.440611 & -0.550410\\
+-0.657117 & +0.395218 & -0.090602 & -0.635446\\
++0.008191 & +0.773622 & -0.356826 & +0.523563\\
+-0.302409 & -0.468060 & -0.818736 & +0.138346\\
+\bottomrule\end{tabular}\end{center}
+A paired sign change in a left and right vector leaves its rank-one term unchanged. Tables are rounded for readability; full precision is retained in matrix\_decomposition.npz.
+
+\clearpage
+\section*{3. Explicit sum of rank-one matrices}
+\[R_i=\sigma_i u_i v_i^T,\qquad A=R_1+R_2+R_3+R_4.\]
+The four components below are the requested explicit rank-one decomposition. Each component is 5 x 4, and A\_k is obtained by adding the first k components. The full-precision arrays are also saved individually as CSV files.
+
+\subsection*{R1}
+\begin{center}\fontsize{8.5}{10.5}\selectfont\begin{tabular}{@{}llll@{}}\toprule
+Column 1 & Column 2 & Column 3 & Column 4\\\midrule
+-9.0264844 & -2.1174750 & +5.7605052 & +7.1960061\\
+-58.1832851 & -13.6489077 & +37.1313016 & +46.3843126\\
++17.3410751 & +4.0679507 & -11.0666953 & -13.8244832\\
+-29.4369556 & -6.9054590 & +18.7860221 & +23.4674434\\
+-11.5229023 & -2.7030964 & +7.3536645 & +9.1861761\\
+\bottomrule\end{tabular}\end{center}
+\subsection*{R2}
+\begin{center}\fontsize{8.5}{10.5}\selectfont\begin{tabular}{@{}llll@{}}\toprule
+Column 1 & Column 2 & Column 3 & Column 4\\\midrule
+-4.0002762 & +2.4059370 & -0.5515516 & -3.8683546\\
++0.6154464 & -0.3701558 & +0.0848567 & +0.5951501\\
++4.1926334 & -2.5216289 & +0.5780735 & +4.0543682\\
++1.4317870 & -0.8611379 & +0.1974125 & +1.3845694\\
++2.6778893 & -1.6105971 & +0.3692230 & +2.5895776\\
+\bottomrule\end{tabular}\end{center}
+\subsection*{R3}
+\begin{center}\fontsize{8.5}{10.5}\selectfont\begin{tabular}{@{}llll@{}}\toprule
+Column 1 & Column 2 & Column 3 & Column 4\\\midrule
+-0.0000359 & -0.0033899 & +0.0015636 & -0.0022942\\
+-0.0002563 & -0.0242066 & +0.0111651 & -0.0163822\\
+-0.0004194 & -0.0396081 & +0.0182689 & -0.0268055\\
++0.0000145 & +0.0013685 & -0.0006312 & +0.0009262\\
++0.0006541 & +0.0617800 & -0.0284955 & +0.0418108\\
+\bottomrule\end{tabular}\end{center}
+\subsection*{R4}
+\begin{center}\fontsize{8.5}{10.5}\selectfont\begin{tabular}{@{}llll@{}}\toprule
+Column 1 & Column 2 & Column 3 & Column 4\\\midrule
++0.0002359 & +0.0003652 & +0.0006388 & -0.0001079\\
+-0.0000324 & -0.0000502 & -0.0000877 & +0.0000148\\
++0.0001528 & +0.0002366 & +0.0004138 & -0.0000699\\
++0.0000437 & +0.0000676 & +0.0001182 & -0.0000200\\
++0.0000973 & +0.0001506 & +0.0002633 & -0.0000445\\
+\bottomrule\end{tabular}\end{center}
+The first component carries almost all of the large-scale magnitude. Later terms are much smaller, yet the fourth term is essential for exact rank 4. A visually negligible or numerically small component is not identical to a zero component.
+
+\clearpage
+\section*{4. Grayscale reconstruction and metric definitions}
+\subsection*{4.1 Three-line core implementation (Task 1)}
+\begin{code}
+A = img @ np.array([0.2126, 0.7152, 0.0722])
+U, s, Vt = np.linalg.svd(A, full_matrices=False)
+A_k = (U[:, :20] * s[:20]) @ Vt[:20, :]
+\end{code}
+The input img is an RGB floating-point array in [0,1]. The weighted sum produces a grayscale matrix. For k=20, the actual reconstruction shape is (512,512). The reconstruction is clipped to [0,1] for display only; raw error identities use the unclipped matrix.
+
+\begin{figure}[H]\centering\includegraphics[width=.97\linewidth,height=2.3in,keepaspectratio]{figures/01_grayscale_rank20.png}\caption{Original grayscale image and its rank-20 reconstruction.}\end{figure}
+\subsection*{4.2 Metrics without explicit reconstruction (Task 3)}
+Let T be the sum of squared singular values over all three color channels, and let R(k) be the sum of squared singular values discarded after rank k. Orthogonal invariance of the Frobenius norm gives the following formulas, with pixel peak value 1:
+
+\[T=\sum_c\sum_i\sigma_{c,i}^2,\quad R(k)=\sum_c\sum_{i>k}\sigma_{c,i}^2,\quad E(k)=1-\frac{R(k)}{T}.\]
+\[\mathrm{relerr}=\sqrt{\frac{R(k)}{T}},\quad \mathrm{MSE}=\frac{R(k)}{HWC},\quad \mathrm{PSNR}=10\log_{10}\frac{1}{\mathrm{MSE}}.\]
+\[P(k)=Ck(H+W+1),\qquad \mathrm{CR}(k)=\frac{HW}{k(H+W+1)}.\]
+For each channel, U needs Hk scalars, singular values need k, and V-transpose needs kW. The +1 term accounts for the singular values. Reverse cumulative sums compute the tails and avoid cancellation from subtracting nearly equal total and prefix energies. At full rank the theoretical MSE is zero and PSNR is infinity.
+
+\clearpage
+\section*{5. RGB rank grid and numerical results}
+Each RGB channel is decomposed separately, truncated at the same k, and stacked to reconstruct a color image (Task 2). The prescribed ranks are 1, 2, 3, 5, 8, 12, 20, 35, 50, 80 and 120. The original plus these eleven reconstructions form the required 3 x 4 grid.
+
+\begin{figure}[H]\centering\includegraphics[width=.97\linewidth,height=4.4in,keepaspectratio]{figures/02_rgb_rank_grid.png}\caption{RGB reconstruction grid. Display values are clipped; titles use theoretical, unclipped PSNR.}\end{figure}
+\begin{center}\fontsize{8.5}{10.5}\selectfont\begin{tabular}{@{}lllll@{}}\toprule
+k & Energy (\%) & Rel. error & PSNR (dB) & Parameter CR\\\midrule
+1 & 78.5057 & 0.463619 & 11.856 & 255.750\\
+4 & 90.5566 & 0.307301 & 15.428 & 63.938\\
+20 & 97.9497 & 0.143188 & 22.061 & 12.788\\
+35 & 98.9712 & 0.101428 & 25.056 & 7.307\\
+80 & 99.7226 & 0.052670 & 30.748 & 3.197\\
+120 & 99.8826 & 0.034267 & 34.482 & 2.131\\
+255 & 99.9897 & 0.010131 & 45.066 & 1.003\\
+256 & 99.9899 & 0.010041 & 45.144 & 0.999\\
+512 & 100.0000 & 0.000000 & Infinity & 0.500\\
+\bottomrule\end{tabular}\end{center}
+All 512 rows, for k=1 through 512, are supplied in image\_metrics\_all\_k.csv. Seven independent explicit reconstructions at k=1,4,20,80,120,256,512 confirm the singular-value tail identity against pixelwise error. Clipped MSE is recorded separately in image\_error\_validation.csv, because clipping changes the error measure.
+
+\clearpage
+\section*{6. Diagnostic curves and break-even rank (Task 4)}
+\begin{figure}[H]\centering\includegraphics[width=.97\linewidth,height=2.15in,keepaspectratio]{figures/03_singular_values.png}\caption{Singular values of R, G and B on a logarithmic vertical scale.}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.97\linewidth,height=2.15in,keepaspectratio]{figures/04_error_psnr.png}\caption{Relative error decreases and PSNR increases with k. The infinite full-rank PSNR is omitted from the finite curve.}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=.97\linewidth,height=2.15in,keepaspectratio]{figures/05_compression_ratio.png}\caption{Parameter compression ratio and the rank at which the parameter count equals the pixel count.}\end{figure}
+The singular-value spectra decay rapidly, allowing small ranks to represent broad structures. Quality improves as k increases, while the parameter compression ratio falls. Once k exceeds the break-even rank, the factor representation contains more scalars than the original image.
+
+\clearpage
+\section*{7. Three key findings (Task 5)}
+\subsection*{7.1 Energy trap}
+At k=1, retained energy is 78.5057\% but PSNR is only 11.856 dB. At k=4, energy reaches 90.5566\% while PSNR is 15.428 dB. Even k=20 retains 97.9497\% with PSNR 22.061 dB. Large color regions and global brightness dominate squared energy; high retained energy alone does not imply good visual fidelity.
+
+\subsection*{7.2 Break-even point: scalars versus actual bytes}
+\[\mathrm{CR}>1\iff k<k^*=\frac{HW}{H+W+1}.\]
+For the actual 512 x 512 image, k* = 255.750244. Therefore k<=255 reduces the scalar count and k>=256 increases it. The handout's approximately 353 belongs to a different 620 x 820 image and is not reused as a measured value.
+
+This comparison assumes equal bytes per scalar. The RGB uint8 pixel payload is 786,432 B. Rank-20 float32 factors need 246,000 B, giving a byte ratio of 3.197, compared with the parameter ratio 12.788. The float32-versus-uint8 break-even rank is only 63.938; k>=64 expands the raw byte payload. The source PNG is 791,555 B and has its own encoding overhead. No comparison with JPEG was performed.
+
+\subsection*{7.3 Detail loss}
+\begin{figure}[H]\centering\includegraphics[width=.97\linewidth,height=2.15in,keepaspectratio]{figures/06_detail_crop.png}\caption{Identical image crop at the original resolution and at ranks 1, 4 and 20.}\end{figure}
+Suit seams, the badge and equipment boundaries become indistinct before broad orange regions disappear. This supports the observed loss of fine detail at low rank in this image. Small singular values are not universally equivalent to high spatial frequencies, so the observation is not asserted as a theorem for every image.
+
+These answers are based on the generated figures and measured metrics. No classroom discussion attendance, group contribution or human observation session is fabricated.
+
+\clearpage
+\section*{8. Eigenfaces: method and evaluation design}
+Eigenfaces uses a shared PCA basis for both compression and recognition [5]. Each image is flattened to D=10304 entries. A training-only mean is subtracted before SVD of the centered training matrix. The leading rows of V-transpose are the shared basis B\_k.
+
+\[z=(x-\mu)B_k^T,\qquad \widehat{x}=\mu+zB_k.\]
+Nearest-neighbor classification compares Euclidean distances between coefficient vectors and returns the label of the closest training photograph. Per subject, a seeded permutation chooses seven training and three test photographs: 280 training and 120 test images overall. Seed 20260917 is retained for reproducibility. Training and test filenames never overlap. The mean, basis and quantization parameters are fitted only on training images.
+
+The principal evaluation uses k=80, fixed before evaluating this run. Other ranks are sensitivity results, not a test-set search for a new optimum. This is closed-set recognition: the identities are present in training, but their test photographs are withheld. It does not measure recognition of previously unseen identities.
+
+\begin{figure}[H]\centering\includegraphics[width=.97\linewidth,height=3.45in,keepaspectratio]{figures/08_mean_eigenfaces.png}\caption{Training mean and the first eleven eigenfaces, each visualized on its own grayscale range.}\end{figure}
+The centered training matrix has numerical rank 279. The basis orthogonality residual is 6.772e-14. Eigenfaces are signed spatial patterns, not additional face photographs. The recorded split and all k=80 predictions are included as CSV files.
+
+\clearpage
+\section*{9. Eigenfaces: recognition and reconstruction results}
+\begin{center}\fontsize{8.5}{10.5}\selectfont\begin{tabular}{@{}lllll@{}}\toprule
+k & Correct /120 & Accuracy (\%) & Test PSNR (dB) & Library param. CR\\\midrule
+1 & 9 & 7.50 & 17.038 & 138.123\\
+2 & 41 & 34.17 & 17.676 & 91.673\\
+5 & 99 & 82.50 & 18.891 & 45.633\\
+10 & 109 & 90.83 & 19.886 & 24.841\\
+20 & 114 & 95.00 & 20.800 & 12.997\\
+32 & 117 & 97.50 & 21.442 & 8.267\\
+50 & 117 & 97.50 & 22.062 & 5.348\\
+80 & 118 & 98.33 & 22.618 & 3.366\\
+120 & 118 & 98.33 & 23.053 & 2.253\\
+200 & 116 & 96.67 & 23.529 & 1.356\\
+279 & 116 & 96.67 & 23.816 & 0.974\\
+\bottomrule\end{tabular}\end{center}
+The primary result is 118/120 correct, or 98.33\%. The descriptive sample-level Wilson 95\% interval is [94.13\%, 99.54\%]. Photographs from a subject are related, and a single random split does not establish cross-identity or real-world generalization.
+
+\begin{figure}[H]\centering\includegraphics[width=.97\linewidth,height=3.25in,keepaspectratio]{figures/09_face_reconstructions.png}\caption{Three held-out test photographs and their shared-basis reconstructions.}\end{figure}
+\[\mathrm{CR}_{\mathrm{library}}=\frac{ND}{D+kD+Nk}.\]
+The denominator includes the mean, basis and all N coefficient vectors. For N=280 and k=80 the scalar ratio is 3.366. The byte ratio additionally depends on dtype. At k=200 and 279, reconstruction PSNR improves while recognition accuracy falls to 96.67\%; better reconstruction need not imply better classification. A held-out image may contain components outside the training subspace, so keeping every nonzero training component still does not reconstruct it exactly.
+
+\clearpage
+\section*{10. Shared-basis upload and int8 coefficient quantization}
+This extension is a local encoder/decoder experiment on real ORL images, not an edge-device deployment. It uses k=32. For each dimension, the 0.1\% and 99.9\% training-coefficient quantiles define lo and hi. Quantization parameters are not fitted to test images.
+
+\[s=\frac{\mathrm{hi}-\mathrm{lo}}{255},\qquad q=\operatorname{round}\!\left(\operatorname{clip}\left(\frac{z-\mathrm{lo}}s,0,255\right)\right)-128.\]
+\[\widehat{z}=(q+128)s+\mathrm{lo},\qquad \widehat{x}=\mu+\widehat{z}B_{32}.\]
+\begin{center}\fontsize{9}{11}\selectfont\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}\toprule
+Measurement & Observed result\\\midrule
+Float coefficient reconstruction PSNR & 21.442089 dB\\
+Int8 coefficient reconstruction PSNR & 21.441348 dB\\
+PSNR loss & 0.000742 dB\\
+Maximum pixel change from float reconstruction & 0.021111 on [0,1]\\
+Coefficients outside training quantile limits & 0.2344\%\\
+Nearest-neighbor accuracy after quantizing both sets & 96.67\%\\
+Raw uint8 frame / int8 coefficients & 10,304 B / 32 B\\
+Shared model raw bytes / NPZ file & 1,360,384 B / 1,362,124 B\\
+Ratio including shared model, first 120 frames & 0.9064\\
+First frame count with total raw-byte savings & 133\\
+\bottomrule\end{tabularx}\end{center}
+The model includes the float32 basis, mean, lo and scale. Its SHA-256 identifier and version are saved with the coefficients. Loading the saved model and decoding the actual int8 bytes is numerically cross-checked. Both endpoints must agree on the basis ID, version and normalization; unknown versions require model synchronization. ORL inputs already use fixed dimensions and division by 255, so no per-frame brightness standardization metadata is used here.
+
+The 322-fold per-frame payload ratio excludes the shared model. Including the model needs at least 133 frames to save raw pixel bytes; packet headers, retransmission and security metadata are excluded. The small mean PSNR loss does not eliminate local distortion: the maximum pixel change is 0.021111, not the handout example of 0.0015.
+
+Projection is not encryption or proven anonymization. These coefficients still allow identity recognition, and a party with the basis can approximately reconstruct faces. Discarding leading components as a privacy measure was not evaluated.
+
+\clearpage
+\section*{11. Three-dimensional shared basis: a teaching simulation}
+The original 3D Morphable Model represents aligned three-dimensional shape and texture using separate learned means and PCA bases [6]. Its shape representation can be written as a mean shape plus a weighted sum of shape modes; texture uses an analogous model.
+
+\[S=\mu_S+\sum_i\alpha_i b_i,\qquad T=\mu_T+\sum_i\beta_i c_i.\]
+No licensed real 3D face scans were supplied. To demonstrate the shared-basis mechanism, a synthetic surface uses a 40 x 32 grid (1280 vertices, 3840 coordinate entries) and six linear deformation modes. A fixed seed generates 200 surfaces, with 160 for training and 40 for testing. This is a controlled simulation, not a scanned human face or a fitted real 3DMM. Texture PCA and photo-to-3D fitting are not implemented.
+
+\begin{figure}[H]\centering\includegraphics[width=.97\linewidth,height=3.1in,keepaspectratio]{figures/11_synthetic_3dmm.png}\caption{Synthetic surface and low-rank reconstruction; no real human scan is shown.}\end{figure}
+\begin{center}\fontsize{9}{11}\selectfont\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}\toprule
+Retained modes k & Held-out coordinate RMSE\\\midrule
+1 & 3.654625e-02\\
+2 & 3.130014e-02\\
+3 & 2.289169e-02\\
+5 & 5.568749e-03\\
+6 & 5.362108e-16\\
+\bottomrule\end{tabularx}\end{center}
+At k=6 the reconstruction reaches floating-point precision because the data generator has exactly six linear deformation degrees of freedom. This validates the code under its construction assumptions; it does not imply that real three-dimensional faces need only six coefficients. A true 3DMM experiment additionally requires licensed scans, consistent vertex correspondence, and independent evaluation on real faces.
+
+\clearpage
+\section*{12. Temporal shared basis: a teaching simulation}
+ORL is a static photograph database; filename order is not a measured time sequence. The temporal extension therefore explicitly generates 300 frames of 32-dimensional coefficient trajectories. A held-out face coefficient vector is perturbed by smooth sinusoids with amplitude 0.12 times each training coefficient standard deviation. The training-fitted quantizer is reused.
+
+\begin{figure}[H]\centering\includegraphics[width=.97\linewidth,height=2.5in,keepaspectratio]{figures/10_synthetic_temporal_coefficients.png}\caption{The first four synthetic coefficient trajectories; these are not measured video frames.}\end{figure}
+An absolute coefficient reset is inserted every 60 frames; other frames store differences from the preceding quantized frame. Differences are stored as int16 because they may exceed the int8 range. zlib level 9 is applied to both direct and differential representations for a fair comparison. Decoding recovers every quantized coefficient exactly, and compressed bytes pass a round-trip check.
+
+\begin{center}\fontsize{9}{11}\selectfont\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}\toprule
+Representation & Actual bytes\\\midrule
+Direct int8 coefficients & 9600\\
+Uncompressed int16 differences & 19200\\
+Direct int8 coefficients + zlib & 1979\\
+Int16 differences + zlib & 1387\\
+\bottomrule\end{tabularx}\end{center}
+Differential coding gives an additional factor of 1.427 relative to directly zlib-compressed coefficients: 1979 B versus 1387 B. This does not reproduce the handout's illustrative factor of 2 to 3. Without entropy compression, int16 differencing doubles the coefficient payload. Including one shared-model transfer, the 300-frame ratio relative to raw uint8 frames is 2.270.
+
+Lossless recovery applies to the already quantized coefficients, not the original image pixels. The smoothness was deliberately built into the simulation. Absolute resets restore predictor state but do not retrain the PCA basis. Scene-change detection, pose-drift detection, basis updates and comparisons against JPEG or video codecs remain untested; those mechanisms are design proposals rather than measured production results.
+
+\clearpage
+\section*{13. Analysis, conclusions and reproducibility}
+\subsection*{13.1 Conclusions}
+The supplied matrix has rank 4 with singular values spanning five orders of magnitude. Two terms retain nearly all energy, while all four are required for exact reconstruction. The left/right eigenvector identities and the rank-one sum agree with numerical reference results.
+
+For images, SVD produces a controlled fidelity-storage tradeoff. Energy, relative error, PSNR, scalar count and actual byte count describe different aspects and must be reported separately. The 512 x 512 image reaches a scalar break-even rank of 255.750, but float32 factors exceed the raw uint8 payload from k=64 onward.
+
+A shared basis unifies face reconstruction and closed-set recognition. The measured k=80 result is 118/120, or 98.33\%, for one reproducible split. A training-only quantizer permits small int8 coefficient payloads, but model transfer and local clipping errors must be included. Synthetic 3D and temporal experiments validate mechanisms under explicit construction assumptions.
+
+\subsection*{13.2 Actual environment and execution}
+\begin{center}\fontsize{9}{11}\selectfont\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}\toprule
+Item & Recorded value\\\midrule
+Execution date & 2026-10-09\\
+Operating system & macOS-27.0-arm64-arm-64bit-Mach-O\\
+Python & 3.13.7\\
+NumPy / SciPy & 2.5.3 / 1.18.1\\
+Matplotlib / Pillow & 3.11.2 / 12.3.0\\
+Seed & 20260917\\
+Numerical checks & 22/22 passed\\
+Core computation elapsed time & 2.168 s\\
+\bottomrule\end{tabularx}\end{center}
+Elapsed time excludes data acquisition, dependency installation and document generation. Codex assisted with requirement extraction, Python implementation, execution and report production. Results are based on executed code and recorded outputs; personal details and assessment fields are deliberately blank. No human group-work record is invented.
+
+\subsection*{13.3 Reproduction}
+\begin{code}
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements-report.txt
+python 02_Experiment/run_experiment.py
+python build_reports.py
+bash 04_LaTeX/compile.sh
+\end{code}
+Run these commands from the package root. The data are included, so numerical reruns need no download. The saved lock file records exact Python-package versions. Export the generated DOCX using Microsoft Word or LibreOffice to refresh its PDF; this delivery uses LibreOffice. Data hashes, numerical checks and final PDF validation are provided in the package. Changes to personal details do not require rerunning the experiment.
+
+\clearpage
+\section*{Appendix A. Original numeric inputs and additional checks}
+\subsection*{Q5 (5 x 5), transcribed row by row from the course PDF}
+\begin{center}\fontsize{8.5}{10.5}\selectfont\begin{tabular}{@{}lllll@{}}\toprule
+Column 1 & Column 2 & Column 3 & Column 4 & Column 5\\\midrule
++0.130739 & +0.608762 & -0.043819 & +0.780233 & -0.040407\\
++0.842723 & -0.093658 & -0.312899 & -0.107165 & -0.414313\\
+-0.251167 & -0.638035 & -0.511983 & +0.505413 & -0.110713\\
++0.426363 & -0.217889 & +0.017690 & +0.144392 & +0.865781\\
++0.166897 & -0.407521 & +0.798582 & +0.321653 & -0.254711\\
+\bottomrule\end{tabular}\end{center}
+\subsection*{Q4 (4 x 4), acting as V-transpose in the supplied product}
+\begin{center}\fontsize{8.5}{10.5}\selectfont\begin{tabular}{@{}llll@{}}\toprule
+Column 1 & Column 2 & Column 3 & Column 4\\\midrule
+-0.690420 & -0.161962 & +0.440611 & +0.550410\\
+-0.657117 & +0.395218 & -0.090602 & -0.635446\\
++0.008191 & +0.773622 & -0.356826 & +0.523562\\
++0.302408 & +0.468060 & +0.818736 & -0.138346\\
+\bottomrule\end{tabular}\end{center}
+\[\Sigma=\begin{pmatrix}100&0&0&0\\0&10&0&0\\0&0&0.1&0\\0&0&0&0.001\\0&0&0&0\end{pmatrix}.\]
+\subsection*{A as printed in the course PDF}
+\begin{center}\fontsize{8.5}{10.5}\selectfont\begin{tabular}{@{}llll@{}}\toprule
+Column 1 & Column 2 & Column 3 & Column 4\\\midrule
+-13.026541 & +0.285432 & +5.211142 & +3.325243\\
+-57.568112 & -14.043353 & +37.227220 & +46.963122\\
++21.533410 & +1.506957 & -10.469915 & -9.796977\\
+-28.005090 & -7.765174 & +18.982906 & +24.852922\\
+-8.844273 & -4.251769 & +7.694661 & +11.817533\\
+\bottomrule\end{tabular}\end{center}
+Direct SVD of the printed, rounded matrix gives singular values 100.000000439, 10.000000130, 0.100000094, 0.001000092. The report consistently uses the assembled version; both arrays are retained so that rounding and assembly conventions are traceable.
+
+The verification record contains 22 passed assertions, including matrix agreement with the printed entries, matrix rank and reconstruction, left/right eigenvector equations, the teaching implementation, seven image-tail identities, monotonic error, full-rank zero tail, all 400 face files and their dimensions, disjoint train/test splits, saved-model decoding, differential decoding, compressed-byte recovery, and six-mode synthetic reconstruction.
+
+\clearpage
+\section*{References and evidence scope}
+[1] Course handout. First Computer Laboratory: SVD and Its Applications. Five-page PDF supplied by the user. The original report template was also supplied by the user; both originals are preserved in 01\_Source\_Materials.
+
+[2] AT\&T Laboratories Cambridge. The Database of Faces (formerly ORL). \url{https://www.cl.cam.ac.uk/research/dtg/attarchive/facedatabase.html}. Dataset: 40 subjects, 10 photographs each, 92 x 112 pixels. Source page checked on 9 October 2026; archived input obtained on 17 September 2026.
+
+[3] scikit-image. skimage.data.astronaut. \url{https://scikit-image.org/docs/stable/api/skimage.data.html#skimage.data.astronaut}. NASA image credit. This experiment uses the archived v0.25.2 image, not a dynamically changed input. Source page checked on 9 October 2026.
+
+[4] NumPy. numpy.linalg.svd documentation. \url{https://numpy.org/doc/stable/reference/generated/numpy.linalg.svd.html}. Consulted for reduced shapes, reconstruction and singular-vector relations on 9 October 2026. Runtime versions are recorded separately.
+
+[5] Turk, M. and Pentland, A. (1991). Eigenfaces for Recognition. Journal of Cognitive Neuroscience, 3(1), 71-86. DOI: 10.1162/jocn.1991.3.1.71. A saved paper copy is included for method background.
+
+[6] Blanz, V. and Vetter, T. (1999). A Morphable Model for the Synthesis of 3D Faces. Proceedings of SIGGRAPH 1999, 187-194. DOI: 10.1145/311535.311556. Author project archive: \url{https://shapemodelling.cs.unibas.ch/gravis-site-archive/Sigg99.html}. Checked on 9 October 2026; saved paper included.
+
+\subsection*{What was measured}
+Matrix SVD, image metrics and reconstructions, ORL Eigenfaces classification, local int8 coefficient decoding, model byte counts, and the controlled synthetic 3D/temporal examples were executed. Values in this report are read from the current results JSON/CSV files. Figures are generated directly by the same run.
+
+\subsection*{What was not established}
+The experiment does not establish real-device latency, actual network transfer, real 3D-face reconstruction accuracy, real-video coding gains, scene-change robustness, privacy protection, or generalization to unseen identities. The handout's citation counts and illustrative performance numbers are not reported as current measurements.
+
+\end{document}

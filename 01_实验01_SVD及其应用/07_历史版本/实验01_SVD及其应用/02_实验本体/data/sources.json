@@ -1,0 +1,30 @@
+[
+  {
+    "file": "02_实验本体/data/att_faces.zip",
+    "url": "https://www.cl.cam.ac.uk/Research/DTG/attarchive/pub/data/att_faces.zip",
+    "bytes": 3769022,
+    "sha256": "509d763bd2276aa054d260d7f1000e8be212738134f2f83d8ff13bc2adf1c8ec",
+    "download_date": "2026-09-17"
+  },
+  {
+    "file": "02_实验本体/data/astronaut.png",
+    "url": "https://raw.githubusercontent.com/scikit-image/scikit-image/v0.25.2/skimage/data/astronaut.png",
+    "bytes": 791555,
+    "sha256": "88431cd9653ccd539741b555fb0a46b61558b301d4110412b5bc28b5e3ea6cb5",
+    "download_date": "2026-09-17"
+  },
+  {
+    "file": "01_指导资料/Eigenfaces_Turk_Pentland_1991.pdf",
+    "url": "https://courses.media.mit.edu/2008fall/mas622j/Turk%2BPentland-1991.pdf",
+    "bytes": 10618813,
+    "sha256": "290b9e2a659d130be182b87e179d4ec34cf6aa35b9fb0d7787e33803662e8f89",
+    "download_date": "2026-09-17"
+  },
+  {
+    "file": "01_指导资料/3DMM_Blanz_Vetter_1999.pdf",
+    "url": "https://www.cs.princeton.edu/courses/archive/spring11/cos598A/pdfs/Blanz99.pdf",
+    "bytes": 2876611,
+    "sha256": "2cbbd06ef8421cbc6b2ce60de0e3cbad3a7a14b824354280795f78f79b32ab77",
+    "download_date": "2026-09-17"
+  }
+]

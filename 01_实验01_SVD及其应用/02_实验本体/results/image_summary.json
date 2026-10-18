@@ -1,0 +1,99 @@
+{
+  "shape": [
+    512,
+    512,
+    3
+  ],
+  "grayscale_rank20_shape": [
+    512,
+    512
+  ],
+  "kstar": 255.75024390243902,
+  "first_expansion_k": 256,
+  "selected": [
+    {
+      "k": 1,
+      "parameters": 3075,
+      "compression_ratio": 255.75024390243902,
+      "relative_error": 0.4636193296665768,
+      "mse": 0.06522265943469505,
+      "psnr_db": 11.856014969396636,
+      "energy": 0.785057117159514
+    },
+    {
+      "k": 4,
+      "parameters": 12300,
+      "compression_ratio": 63.937560975609756,
+      "relative_error": 0.30730140743685397,
+      "mse": 0.02865527180988624,
+      "psnr_db": 15.427954676817556,
+      "energy": 0.9055658449873287
+    },
+    {
+      "k": 20,
+      "parameters": 61500,
+      "compression_ratio": 12.787512195121952,
+      "relative_error": 0.14318764757192848,
+      "mse": 0.0062213773239433515,
+      "psnr_db": 22.06113458079116,
+      "energy": 0.9794972975828172
+    },
+    {
+      "k": 35,
+      "parameters": 107625,
+      "compression_ratio": 7.307149825783972,
+      "relative_error": 0.10142824699030296,
+      "mse": 0.0031217151547568087,
+      "psnr_db": 25.0560672727009,
+      "energy": 0.9897123107124741
+    },
+    {
+      "k": 80,
+      "parameters": 246000,
+      "compression_ratio": 3.196878048780488,
+      "relative_error": 0.052670148723126885,
+      "mse": 0.0008417914745229325,
+      "psnr_db": 30.747954770037666,
+      "energy": 0.9972258554334837
+    },
+    {
+      "k": 120,
+      "parameters": 369000,
+      "compression_ratio": 2.131252032520325,
+      "relative_error": 0.03426679123121938,
+      "mse": 0.0003563053233956958,
+      "psnr_db": 34.48177689004289,
+      "energy": 0.998825787018716
+    },
+    {
+      "k": 255,
+      "parameters": 784125,
+      "compression_ratio": 1.0029421329507413,
+      "relative_error": 0.010131219959210857,
+      "mse": 3.114575926946048e-05,
+      "psnr_db": 45.06601077455833,
+      "energy": 0.9998973583821381
+    },
+    {
+      "k": 256,
+      "parameters": 787200,
+      "compression_ratio": 0.9990243902439024,
+      "relative_error": 0.010041093477998484,
+      "mse": 3.059408394817253e-05,
+      "psnr_db": 45.143625459714926,
+      "energy": 0.9998991764417661
+    },
+    {
+      "k": 512,
+      "parameters": 1574400,
+      "compression_ratio": 0.4995121951219512,
+      "relative_error": 0.0,
+      "mse": 0.0,
+      "psnr_db": "Infinity",
+      "energy": 1.0
+    }
+  ],
+  "raw_uint8_bytes": 786432,
+  "source_png_bytes": 791555,
+  "k20_float32_factor_bytes": 246000
+}

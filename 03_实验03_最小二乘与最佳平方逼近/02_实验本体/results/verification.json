@@ -1,0 +1,196 @@
+{
+  "passed": 38,
+  "total": 38,
+  "checks": [
+    {
+      "name": "All assigned tasks present",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Original source hashes unchanged",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "All 129 coordinates match source PDF",
+      "passed": true,
+      "detail": "129 source points"
+    },
+    {
+      "name": "All 24 population rows match source PDF",
+      "passed": true,
+      "detail": "24 source rows"
+    },
+    {
+      "name": "1.1 literal: exact rational solution",
+      "passed": true,
+      "detail": "[Fraction(677, 445), Fraction(203, 890), Fraction(-449, 890)]"
+    },
+    {
+      "name": "1.1 literal: normal equations and residual",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "1.1 alternative: exact rational solution",
+      "passed": true,
+      "detail": "[Fraction(1, 1), Fraction(9, 2), Fraction(-5, 2)]"
+    },
+    {
+      "name": "1.1 alternative: normal equations and residual",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "1.2: independent exact coefficients",
+      "passed": true,
+      "detail": "[Fraction(-3170, 43), Fraction(310, 43)]"
+    },
+    {
+      "name": "1.2: reference polynomial fit and RSS",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "1.3 exponential: independent LAPACK QR reference",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "1.3 exponential: both objectives recomputed",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "1.3 exponential: parameter units and transformation",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "1.3 variable_rate: independent LAPACK QR reference",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "1.3 variable_rate: both objectives recomputed",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "1.3 variable_rate: parameter units and transformation",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "1.3: nested quadratic reduces log RSS",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "2.1: coefficients and exact squared error",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "2.1: projection residual orthogonal",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "2.2: Legendre orthogonality and norms",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "2.2: projection and exact squared error",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "2.2: residual orthogonal to full basis",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "2.3: symmetry and exact coefficients",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "2.3: exact minimum error and Taylor error",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "2.3: independent quadrature and orthogonality",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "2.3: L2 error less than degree-two Taylor error",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "3.1 lower: correct geometric split",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "3.1 lower: SVD reference and full rank",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "3.1 lower: residual metrics and orthogonality",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "3.1 lower: closure enforced by basis",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "3.1 lower: CSV agrees with results",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "3.1 upper: correct geometric split",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "3.1 upper: SVD reference and full rank",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "3.1 upper: residual metrics and orthogonality",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "3.1 upper: closure enforced by basis",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "3.1 upper: CSV agrees with results",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "All explicit QR solutions agree with NumPy",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "All explicit normal-equation solutions agree with NumPy",
+      "passed": true,
+      "detail": ""
+    }
+  ]
+}

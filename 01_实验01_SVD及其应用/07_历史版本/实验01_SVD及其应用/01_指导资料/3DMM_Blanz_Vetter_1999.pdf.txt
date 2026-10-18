@@ -1,0 +1,454 @@
+        A Morphable Model For The Synthesis Of 3D Faces
+
+                                       Volker Blanz         Thomas Vetter
+
+                                     Max-Planck-Institut f¨ur biologische Kybernetik,
+                                                    T¨ubingen, Germany
+
+Abstract                                      3D Database
+                                                                      Morphable
+In this paper, a new technique for modeling textured 3D faces is                         Face Model
+introduced. 3D faces can either be generated automatically from
+one or more photographs, or modeled directly through an intuitive
+user interface. Users are assisted in two key problems of computer
+aided face modeling. First, new face images or new 3D face mod-                                         Modeler
+els can be registered automatically by computing dense one-to-one                Face
+correspondence to an internal face model. Second, the approach                 Analyzer
+regulates the naturalness of modeled faces avoiding faces with an
+“unlikely” appearance.                                           2D Input                                      3D Output
+   Starting from an example set of 3D face models, we derive a
+morphable face model by transforming the shape and texture of the      Figure 1: Derived from a dataset of prototypical 3D scans of faces,
+examples into a vector space representation. New faces and expres-       the morphable face model contributes to two main steps in face
+sions can be modeled by forming linear combinations of the proto-      manipulation: (1) deriving a 3D face model from a novel image,
+types. Shape and texture constraints derived from the statistics of      and (2) modifying shape and texture in a natural way.
+our example faces are used to guide manual modeling or automated
+matching algorithms.                                                    application to application, but usually ranges from 50 to 300.
+  We show 3D face reconstructions from single images and their        Only a correct alignment of all these points allows acceptable in-
+applications for photo-realistic image manipulations.  We also      termediate morphs, a convincing mapping of motion data from the
+demonstrate face manipulations according to complex parameters       reference to a new model, or the adaptation of a 3D face model to
+such as gender, fullness of a face or its distinctiveness.             2D images for ‘video cloning’. Human knowledge and experience
+                                                                                        is necessary to compensate for the variations between individualKeywords:   facial modeling, registration, photogrammetry, mor-                                                                        faces and to guarantee a valid location assignment in the differentphing, facial animation, computer vision                                                                             faces. At present, automated matching techniques can be utilized
+                                                                  only for very prominent feature points such as the corners of eyes
+1  Introduction                                         and mouth.
+                                          A second type of problem in face modeling is the separation of
+Computer aided modeling of human faces still requires a great deal       natural faces from non faces. For this, human knowledge is even
+of expertise and manual control to avoid unrealistic, non-face-like     more critical. Many applications involve the design of completely
+results. Most limitations of automated techniques for face synthe-     new natural looking faces that can occur in the real world but which
+sis, face animation or for general changes in the appearance of an      have no “real” counterpart. Others require the manipulation of an
+individual face can be described either as the problem of ﬁnding       existing face according to changes in age, body weight or simply to
+corresponding feature locations in different faces or as the problem      emphasize the characteristics of the face. Such tasks usually require
+of separating realistic faces from faces that could never appear in      time-consuming manual work combined with the skills of an artist.
+the real world. The correspondence problem is crucial for all mor-         In this paper, we present a parametric face modeling technique
+phing techniques, both for the application of motion-capture data       that assists in both problems.  First, arbitrary human faces can be
+to pictures or 3D face models, and for most 3D face reconstruction       created simultaneously controlling the likelihood of the generated
+techniques from images. A limited number of labeled feature points       faces. Second, the system is able to compute correspondence be-
+marked in one face, e.g., the tip of the nose, the eye corner and less      tween new faces. Exploiting the statistics of a large datasetT      of 3D
+prominent points on the cheek, must be located precisely in another       face scans (geometric and textural data, C y ber w ar e M) we built
+face. The number of manually labeled feature points varies from      a morphable face model and recover domain knowledge about face
+                                                                           variations by applying pattern classiﬁcation methods.  The mor-
+   MPI f¨ur biol. Kybernetik, Spemannstr. 38, 72076 T¨ubingen, Germany.      phable face model is a multidimensional 3D morphing function that
+E-mail: fvolker.blanz, thomas.vetterg@tuebingen.mpg.de                          is based on the linear combination of a large number of 3D face
+                                                                          scans. Computing the average face and the main modes of vari-
+                                                                          ation in our dataset, a probability distribution is imposed on the
+                                                             morphing function to avoid unlikely faces. We also derive paramet-
+                                                                                    ric descriptions of face attributes such as gender, distinctiveness,
+                                                              “hooked” noses or the weight of a person, by evaluating the distri-
+                                                                      bution of exemplar faces for each attribute within our face space.
+                                                               Having constructed a parametric face model that is able to gener-
+                                                                            ate almost any face, the correspondence problem turns into a mathe-
+                                                                      matical optimization problem. New faces, images or 3D face scans,
+                                                                can be registered by minimizing the difference between the new
+                                                                        face and its reconstruction by the face model function. We devel-
+oped an algorithm that adjusts the model parameters automatically      ing intermediate 2D morphable image models. As a consequence,
+for an optimal reconstruction of the target, requiring only a mini-      head orientation, illumination conditions and other parameters can
+mum of manual initialization. The output of the matching proce-      be free variables subject to optimization. It is sufﬁcient to use rough
+dure is a high quality 3D face model that is in full correspondence       estimates of their values as a starting point of the automated match-
+with our morphable face model. Consequently all face manipula-      ing procedure.
+tions parameterized in our model function can be mapped to the       Most techniques for ‘face cloning’, the reconstruction of a 3D
+target face. The prior knowledge about the shape and texture of       face model from one or more images, still rely on manual assistance
+faces in general that is captured in our model function is sufﬁcient       for matching a deformable 3D face model to the images [26, 1, 30].
+to make reasonable estimates of the full 3D shape and texture of a     The approach of Pighin et al. [28] demonstrates the high realism
+face even when only a single picture is available. When applying       that can be achieved for the synthesis of faces and facial expressions
+the method to several images of a person, the reconstructions reach      from photographs where several images of a face are matched to a
+almost the quality of laser scans.                                         single 3D face model. Our automated matching procedure could be
+                                                                 used to replace the manual initialization step, where several corre-
+1.1  Previous and related work                            sponding features have to be labeled in the presented images.
+                                                                  For the animation of faces, a variety of methods have been pro-Modeling human faces has challenged researchers in computer                                                                     posed.  For a complete overview we again refer to the book ofgraphics since its beginning. Since the pioneering work of Parke                                                                 Parke and Waters [24]. The techniques can be roughly separated[25, 26], various techniques have been reported for modeling the                                                                           in those that rely on physical modeling of facial muscles [38, 17],geometry of faces [10, 11, 22, 34, 21] and for animating them                                                             and in those applying previously captured facial expressions to a[28, 14, 19, 32, 22, 38, 29]. A detailed overview can be found in                                                                        face [25, 3]. These performance based animation techniques com-the book of Parke and Waters [24].                                                                     pute the correspondence between the different facial expressions of  The key part of our approach is a generalized model of human                                                                  a person by tracking markers glued to the face from image to im-faces. Similar to the approach of DeCarlos et al. [10], we restrict                                                                        age. To obtain photo-realistic face animations, up to 182 markersthe range of allowable faces according to constraints derived from                                                                        are used [14]. Working directly on faces without markers, our au-prototypical human faces. However, instead of using a limited set                                                                tomated approach extends this number to its limit.  It matches theof measurements and proportions between a set of facial landmarks,                                                                                     full number of vertices available in the face model to images. Thewe directly use the densely sampled geometry of the exemplar faces                                   T                                resulting dense correspondence ﬁelds can even capture changes inobtained by laser scanning ( C y ber w ar e M). The dense model-                                                                     wrinkles and map these from one face to another.ing of facial geometry (several thousand vertices per face) leads
+directly to a triangulation of the surface. Consequently, there is no                                                         1.2  Organization of the paperneed for variational surface interpolation techniques [10, 23, 33].
+We also added a model of texture variations between faces. The                                             We start with a description of the database of 3D face scans from
+morphable 3D face model is a consequent extension of the interpo-                                                            which our morphable model is built.
+lation technique between face geometries, as introduced by Parke                                                                         In Section 3, we introduce the concept of the morphable face[26]. Computing correspondence between individual 3D face data                                                                model, assuming a set of 3D face scans that are in full correspon-automatically, we are able to increase the number of vertices used                                                                     dence. Exploiting the statistics of a dataset, we derive a parametricin the face representation from a few hundreds to tens of thousands.                                                                         description of faces, as well as the range of plausible faces. Ad-Moreover, we are able to use a higher number of faces, and thus                                                                                 ditionally, we deﬁne facial attributes, such as gender or fullness ofto interpolate between hundreds of ’basis’ faces rather than just a                                                                             faces, in the parameter space of the model.few. The goal of such an extended morphable face model is to rep-                                                                         In Section 4, we describe an algorithm for matching our ﬂexibleresent any face as a linear combination of a limited basis set of face                                                           model to novel images or 3D scans of faces. Along with a 3D re-prototypes. Representing the face of an arbitrary person as a linear                                                                          construction, the algorithm can compute correspondence, based oncombination (morph) of “prototype” faces was ﬁrst formulated for                                                                        the morphable model.image compression in telecommunications [8]. Image-based linear
+                                                                         In Section 5, we introduce an iterative method for building a mor-2D face models that exploit large data sets of prototype faces were
+                                                                   phable model automatically from a raw data set of 3D face scansdeveloped for face recognition and image coding [4, 18, 37].
+                                                       when no correspondences between the exemplar faces are available.   Different approaches have been taken to automate the match-
+ing step necessary for building up morphable models. One class
+of techniques is based on optic ﬂow algorithms [5, 4] and another
+on an active model matching strategy [12, 16]. Combinations of    2  Database
+both techniques have been applied to the problem of image match-
+ing [36]. In this paper we extend this approach to the problem of      Laser scans (C y ber w ar e T M) of 200 heads of young adults (100
+matching 3D faces.                                             male and 100 female) were used. The laser scans provide head
+  The  correspondence  problem  between   different   three-       structure data in a cylindrical representation, with radii r (h;  ) of
+dimensional face data has been addressed previously by Lee       surface points sampled at 512 equally-spaced angles    , and at 512
+et al.[20].  Their shape-matching algorithm differs signiﬁcantly      equally spaced vertical steps h. Additionally, the RGB-color values
+from our approach in several respects.   First, we compute the   R (h;  ), G(h;  ),and B (h;  ), were recorded in the same spatial
+correspondence in high resolution, considering shape and texture       resolution and were stored in a texture map with 8 bit per channel.
+data simultaneously.  Second, instead of using a physical tissue         All faces were without makeup, accessories, and facial hair. The
+model to constrain the range of allowed mesh deformations, we use       subjects were scanned wearing bathing caps, that were removed
+the statistics of our example faces to keep deformations plausible.        digitally. Additional automatic pre-processing of the scans, which
+Third, we do not rely on routines that are speciﬁcally designed to       for most heads required no human interaction, consisted of a ver-
+detect the features exclusively found in faces, e.g., eyes, nose.              tical cut behind the ears, a horizontal cut to remove the shoulders,
+  Our general matching strategy can be used not only to adapt the      and a normalization routine that brought each face to a standard
+morphable model to a 3D face scan, but also to 2D images of faces.       orientation and position in space. The resultant faces were repre-
+Unlike a previous approach [35], the morphable 3D face model is      sented by approximately 70,000 vertices and the same number of
+now directly matched to images, avoiding the detour of generat-       color values.
+                                                                                    Prototype       Average        Segments3  Morphable 3D Face Model
+The morphable model is based on a data set of 3D faces. Morphing                                    *
+between faces requires full correspondence between all of the faces.
+In this section, we will assume that all exemplar faces are in full
+correspondence. The algorithm for computing correspondence will
+be described in Section 5.
+
+                                                                                                                                                                                   S                                                                                                                                                                                           (1/2                                                                                                                                                                                  1/2                                                                                                                                                                                      1/2                                                                                                                                                                                                        1/2)  We represent the geometry                                                                       S (+ + + +)              S (0 0 0 0)                              of a face with a shape-vector S =                      T (+ + + +)                 T (0 0 0 0)                                      T                                                                                                                                                                                           (1/2                                                                                                                                                                                  1/2                                                                                                                                                                                      1/2                                                                                                                                                                                                       1/2)                         T(X  ; Y  ; Z  ; X  ; :::::; Y n ; Zn )   < n, that contains the X ; Y ; Z-
+coordinates of its n vertices. For simplicity, we assume that the
+number of valid texture values in the texture map is equal to the
+number of vertices. We therefore represent the texture of a face by
+a texture-vector T = (R  ; G  ; B  ; R  ; :::::; Gn ; Bn )T  < n, that
+contains the R ; G; B color values of the n corresponding vertices.
+A morphable face model was then constructed using a data set of m                  S (0 0 − +)            S (+ 0 − 0)               S (+ − − −)              S (+ + +.−)
+exemplar faces, each represented by its shape-vector S i and texture-                      T (+ + + +)              T (− − − −)                  T (− − − −)                 T (+ + + +)
+vector T i. Since we assume all faces in full correspondence (see                                                 #
+Section 5), new shapes S model and new textures T model can be
+expressed in barycentric coordinates as a linear combination of the
+shapes and textures of the m exemplar faces:
+
+
+      m           m      m    m
+                                                                                                                 S (− − − +)             S (− − + 0)              S (− + + −)              S (− − − −)
+                                                                                 i =   :                        T (− − − −)                T (0 0 0 0)                 T (0 0 0 0)                 T (− − − −)                                                                    i = P b                                                  i Ti ; P a                    i Si ; T mod = P bS mod = P a
+        i=                 i=         i=      i=
+                                                                    Figure 2: A single prototype adds a large variety of new faces to the
+  We deﬁne the morphable model as the set of faces (S mod (~a),      morphable model. The deviation of a prototype from the average is
+T mod (~b)), parameterized by the coefﬁcients ~a = (a  ; a :::a m )T      added (+) or subtracted (-) from the average. A standard morph (*)
+                                                                                        is located halfway between average and the prototype. Subtractingand ~b = (b  ; b :::bm )T . 1 Arbitrary new faces can be generated by                                                                         the differences from the average yields an ’anti’-face (#). Adding
+varying the parameters ~a and ~b that control shape and texture.                                                              and subtracting deviations independently for shape (S) and texture
+  For a useful face synthesis system, it is important to be able to                                                                     (T) on each of four segments produces a number of distinct faces.
+quantify the results in terms of their plausibility of being faces. We
+therefore estimated the probability distribution for the coefﬁcients
+ai and b i from our example set of faces. This distribution enables      be increased by dividing faces into independent subregions that are
+us to control the likelihood of the coefﬁcients a i and b i and conse-     morphed independently, for example into eyes, nose, mouth and a
+quently regulates the likelihood of the appearance of the generated      surrounding region (see Figure 2). Since all faces are assumed to
+faces.                                                          be in correspondence, it is sufﬁcient to deﬁne these regions on a
+  We ﬁt a multivariate normal distribution to our data set of 200       reference face. This segmentation is equivalent to subdividing the
+faces, based on the averages of shape S and texture T and the co-       vector space of faces into independent subspaces. A complete 3D
+variance matrices C S and C T computed over the shape and texture       face is generated by computing linear combinations for each seg-
+differences  S i = Si  S and  T i = Ti   T.                    ment separately and blending them at the borders according to an
+  A common technique for data compression known as Principal      algorithm proposed for images by [7] .
+Component Analysis (PCA) [15, 31] performs a basis transforma-
+tion to an orthogonal coordinate system formed by the eigenvectors     3.1  Facial attributes
+s i and t i of the covariance matrices (in descending order according                                                            Shape and texture coefﬁcients    i and   i in our morphable faceto their eigenvalues)2:                                                           model do not correspond to the facial attributes used in human lan-
+            m              m                    guage. While some facial attributes can easily be related to biophys-
+                                                                                  ical measurements [13, 10], such as the width of the mouth, others    Smodel = S + X   i si ; Tmodel = T + X   i ti ;    (1)                                                                 such as facial femininity or being more or less bony can hardly be
+                    i=                      i=                   described by numbers. In this section, we describe a method for
+                                                           mapping facial attributes, deﬁned by a hand-labeled set of example
+~ ; ~  <m    . The probability for coefﬁcients ~ is given by                                                                              faces, to the parameter space of our morphable model. At each po-
+                   m                                        sition in face space (that is for any possible face), we deﬁne shape
+                                                             and texture vectors that, when added to or subtracted from a face,               p( ~ )   exp[ X (  i =  i )  ];               (2)                                                                           will manipulate a speciﬁc attribute while keeping all other attributes
+                              i=                                   as constant as possible.
+with   i being the eigenvalues of the shape covariance matrix C S.         In a performance based technique [25], facial expressions can be
+                                                                           transferred by recording two scans of the same individual with dif-The probability p( ~ ) is computed similarly.
+                                                                            ferent expressions, and adding the differences  S = S expr ession  Segmented morphable model:  The morphable model de-
+                                               Sneutr al,  T = T expr ession  Tneutr al, to a different individualscribed in equation (1), has m      degrees of freedom for tex-
+                                                                           in a neutral expression.ture and m      for shape. The expressiveness of the model can
+                                                                    Unlike facial expressions, attributes that are invariant for each in-
+   1Standard morphing between two faces (m =   ) is obtained if the pa-       dividual are more difﬁcult to isolate. The following method allows
+rameters a  ; b  are varied between 0 and    , setting a =     a  and      us to model facial attributes such as gender, fullness of faces, dark-
+b =     b  .                                                          ness of eyebrows, double chins, and hooked versus concave noses
+   2Due to the subtracted average vectors S and T , the dimensions of      (Figure 3). Based on a set of faces (S i ; T i ) with manually assigned
+S panf Si g and S panf T i g are at most m       .                            labels   i describing the markedness of the attribute, we compute
+weighted sums                                      2D Input
+         m              m
+
+                                                                                                                   Initializing      S = X   i (Si  S );   T = X   i (Ti  T ):     (3)
+                                                                                       the
+             i=                      i=                                         Morphable Model
+   Multiples of (  S;  T ) can now be added to or subtracted from
+any individual face. For binary attributes, such as gender, we assign                                roughalignmentinteractiveof
+constant values A for all m A faces in class A, and B =  A for                             3D average head
+all m B faces in B. Affecting only the scaling of  S and  T, the
+choice of  A, B is arbitrary.
+  To justify this method, let  (S; T ) be the overall function de-            Automated 3D Shape and Texture Reconstruction
+scribing the markedness of the attribute in a face (S; T ).  Since
+ (S; T ) is not available per se for all (S; T ), the regression prob-
+lem of estimating  (S; T ) from a sample set of labeled faces has
+to be solved. Our technique assumes that  (S; T ) is a linear func-
+tion.  Consequently, in order to achieve a change      of the at-
+tribute, there is only a single optimal direction (  S;  T ) for the
+whole space of faces.  It can be shown that Equation (3) deﬁnes
+the direction with minimal variance-normalized length k S k M =
+h  S; CS  S i, k T k M = h T ; CT   T i.                         Detail
+  A different kind of facial attribute is its “distinctiveness”, which
+is commonly manipulated in caricatures. The automated produc-                     Illumination Corrected Texture Extraction
+tion of caricatures has been possible for many years [6]. This tech-
+nique can easily be extended from 2D images to our morphable face
+model. Individual faces are caricatured by increasing their distance
+from the average face. In our representation, shape and texture co-
+efﬁcients   i ;   i are simply multiplied by a constant factor.
+
+
+     ORIGINAL      CARICATURE    MORE MALE       FEMALE
+
+
+                                                              Detail
+
+                                                                    Figure 4: Processing steps for reconstructing 3D shape and texture
+                                                                       of a new face from a single image. After a rough manual alignment
+                                                                       of the average 3D head (top row), the automated matching proce-
+                                                                   dure ﬁts the 3D morphable model to the image (center row). In the
+                                                                              right column, the model is rendered on top of the input image. De-
+                                                                                        tails in texture can be improved by illumination-corrected texture
+                                                                          extraction from the input (bottom row).
+
+                                                                                     ir;dir ; ig ;dir ; i b;dir of directed light. In order to handle photographs
+      SMILE        FROWN        WEIGHT     HOOKED NOSE        taken under a wide variety of conditions, ~ also includes color con-
+                                                                                      trast as well as offset and gain in the red, green, and blue channel.
+                                                                 Other parameters, such as camera distance, light direction, and sur-Figure 3: Variation of facial attributes of a single face. The appear-
+                                                                       face shininess, remain ﬁxed to the values estimated by the user.ance of an original face can be changed by adding or subtracting
+shape and texture vectors speciﬁc to the attribute.                    From parameters ( ~ ; ~ ; ~), colored images
+                                                                    Imodel (x; y ) = (I r;mod (x; y ); I g ;mod (x; y ); Ib;mod (x; y )) T  (4)
+4  Matching a morphable model to images       are rendered using perspective projection and the Phong illumina-
+                                                                            tion model. The reconstructed image is supposed to be closest toA crucial element of our framework is an algorithm for automati-
+                                                                        the input image in terms of Euclidean distancecally matching the morphable face model to one or more images.
+                                                                                               input (x; y )   Imodel (x; y )k  :Providing an estimate of the face’s 3D structure (Figure 4), it closes        EI = Px;y kI
+the gap between the speciﬁc manipulations described in Section 3.1,                                                              Matching a 3D surface to a given image is an ill-posed problem.and the type of data available in typical applications.                                                           Along with the desired solution, many non-face-like surfaces lead   Coefﬁcients of the 3D model are optimized along with a set of                                                                           to the same image.  It is therefore essential to impose constraintsrendering parameters such that they produce an image as close as                                                           on the set of solutions. In our morphable model, shape and texturepossible to the input image. In an analysis-by-synthesis loop, the                                                                        vectors are restricted to the vector space spanned by the database.algorithm creates a texture mapped 3D face from the current model                                                                   Within the vector space of faces, solutions can be further re-parameters, renders an image, and updates the parameters accord-                                                                                stricted by a tradeoff between matching quality and prior proba-ing to the residual difference.  It starts with the average head and                                                                                         bilities, using P ( ~ ), P ( ~ ) from Section 3 and an ad-hoc estimatewith rendering parameters roughly estimated by the user.                                                                       of P ( ~ ). In terms of Bayes decision theory, the problem is to ﬁnd  Model Parameters:   Facial shape and  texture are deﬁned
+by coefﬁcients    j and   j, j =     ; :::; m      (Equation  1).       the set of parameters ( ~ ; ~ ; ~) with maximum posterior probabil-
+Rendering parameters ~ contain camera position (azimuth and         ity, given an image I input.  While ~ , ~ , and rendering parame-
+elevation),  object  scale, image plane  rotation and  translation,       ters ~ completely determine the predicted image I model, the ob-
+intensity  i r;amb ; ig ;amb ; ib;amb  of ambient  light, and  intensity      served image I input may vary due to noise. For Gaussian noise
+with a standard deviation  N, the likelihood to observe I input is
+p(I input j ~ ; ~ ; ~ )   exp[   EI ]. Maximum posterior probabil-
+ity is then achieved by minimizingN      the cost function                       InputPairImagesof
+
+          m      m
+                               j               j          (  j      j )
+ E =   EI + X   + X   + X                (5)
+      N         j =   S;j     j =   T ;j      j           ;j               Automated
+                                                                  Simultaneous               Original
+  The optimization algorithm described below uses an estimate of         Matching
+E based on a random selection of surface points. Predicted color
+values I model are easiest to evaluate in the centers of triangles. In
+the center of triangle k, texture ( Rk ; Gk ; Bk )T and 3D location       Reconstruction
+           T                                                             of 3D Shape
+( Xk ; Y k ; Zk )  are averages of the values at the corners. Perspec-       and Texture
+tive projection maps these points to image locations (p x;k ; p y ;k )T .
+Surface normals n k of each triangle k are determined by the 3D lo-
+cations of the corners. According to Phong illumination, the color          Illumination
+components I r;model, I g ;model and I b;model take the form                Corrected           Reconstruction
+                                                                          Texture
+ Ir;model;k = (ir;amb + ir;dir  (nk l))Rk + ir;dir s  (rk vk )   (6)           Extraction
+
+where l is the direction of illumination, v k the normalized differ-
+ence of camera position and the position of the triangle’s center, and         3D Result
+r k =  (nl )n    l the direction of the reﬂected ray. s denotes sur-
+face shininess, and   controls the angular distribution of the spec-
+ular reﬂection. Equation (6) reduces to I r;model;k = ir;amb Rk if                    New Views
+a shadow is cast on the center of the triangle, which is tested in a
+method described below.                                                                    Figure 5: Simultaneous reconstruction of 3D shape and texture of a  For high resolution 3D meshes, variations in I model across each                                                      new face from two images taken under different conditions. In thetriangle k   f  ; :::; n t g are small, so E I may be approximated by                                                                         center row, the 3D face is rendered on top of the input images.
+
+             nt
+                                                                                        j. In subsequent iterations, more and more principal components    EI X ak  kIinput (px;k ; py ;k )   Imodel;k k  ;                                                                        are added.
+              k =                                                          c) Starting with a relatively large  N, which puts a strong weight
+where a k is the image area covered by triangle k. If the triangle is     on prior probability in equation (5) and ties the optimum towards
+occluded, a k = 0.                                                      the prior expectation value, we later reduce N to obtain maximum
+   In gradient descent, contributions from different triangles of the      matching quality.
+mesh would be redundant. In each iteration, we therefore select a      d) In the last iterations, the face model is broken down into seg-
+random subset K   f  ; :::; n t g of 40 triangles k and replace E I by      ments (Section 3). With parameters   j ﬁxed, coefﬁcients   j and
+                                                                                          j are optimized independently for each segment. This increased
+                                                          number                                                                               of                                                                              degrees of                                                                                freedom                                                                                                     signiﬁcantly                                                                                                      improves                                                                                                                                           facial                                                                                                                                                     details.     EK = X kIinput (px;k ; p y ;k )   Imodel;k )k  :       (7)                                                                                                                         It is                                                                                               straightforward                                                                                                                    to extend                                                                                                                                         this                                                                                                                       technique                                                                                                                                              to                                                                Multiple                                                                     Images:
+               k K                                                    the case where several images of a person are available (Figure 5).
+                                                            While shape and texture are still described by a common set of   jThe probability of selecting k is p(k  K )   a k. This method of                                                             and   j, there is now a separate set of  j for each input image. E Istochastic gradient descent [16] is not only more efﬁcient computa-                                                                                        is replaced by a sum of image distances for each pair of input andtionally, but also helps to avoid local minima by adding noise to the                                                           model images, and all parameters are optimized simultaneously.gradient estimate.                                                                 Illumination-Corrected Texture Extraction: Speciﬁc features of  Before the ﬁrst iteration, and once every 1000 steps, the algo-                                                                         individual faces that are not captured by the morphable model, suchrithm computes the full 3D shape of the current model, and 2D po-             T                                                       as blemishes, are extracted from the image in a subsequent texturesitions (p x ; py )  of all vertices. It then determines a k, and detects                                                                       adaptation process. Extracting texture from images is a techniquehidden surfaces and cast shadows in a two-pass z-buffer technique.                                                                 widely used in constructing 3D models from images (e.g.  [28]).We assume that occlusions and cast shadows are constant during                                                              However, in order to be able to change pose and illumination, iteach subset of iterations.                                                                                        is important to separate pure albedo at any given point from the   Parameters are updated depending on analytical derivatives of                                         @ E                      inﬂuence of shading and cast shadows in the image.  In our ap-
+the cost function E, using   j !   j      j  @  j , and similarly for      proach, this can be achieved because our matching procedure pro-
+  j and  j, with suitable factors  j.                                     vides an estimate of 3D shape, pose, and illumination conditions.
+   Derivatives              of                  texture                     and                           shape                                  (Equation                                              1)                                                  yield                                                          derivatives                                                                                                                  I mod;i                                                                Subsequent                                                                                        to                                                                                matching,                                                                    we                                                                                   compare                                                                                                             the prediction                                                                                                                                         for                                                                                                                       each
+                ( p                   x;k ; py ;kof  2D locations                           )T ,                              surface                                  normals                             n k,                                                   vectors                                      v k and                                                                               I                                                                                      input (px;i ;                                                                            py                                                                        vertex i with                                                                                                                                                     ;i ), and compute                                                                                                                     the change                                                                                                                                      in                                                                                                                                        texture
+r k, and I model;k (Equation 6) using chain rule. From Equation (7),     (Ri ; Gi ; B i ) that accounts for the difference. In areas occluded in
+               K                   K                          K
+partial derivatives @@E                           j , @@E                                   j  , and @@E                                                j can be obtained.                the image, we rely on the prediction made by the model. Data from
+Coarse-to-Fine: In order to avoid local minima, the algorithm fol-      multiple images can be blended using methods similar to [28].
+lows a coarse-to-ﬁne strategy in several respects:
+a) The ﬁrst set of iterations is performed on a down-sampled version     4.1  Matching a morphable model to 3D scansof the input image with a low resolution morphable model.
+b) We start by optimizing only the ﬁrst coefﬁcients   j and   j con-     The method described above can also be applied to register new
+trolling the ﬁrst principal components, along with all parameters    3D faces.  Analogous to images, where perspective projection
+P  : R ! R  and an illumination model deﬁne a colored im-
+age I(x; y ) = (R (x; y ); G(x; y ); B (x; y )) T , laser scans provide
+a two-dimensional cylindrical parameterization of the surface by
+means of a mapping C : R ! R  ;  (x; y ; z ) ! (h;  ). Hence,
+a scan can be represented as
+        I(h;  ) = (R (h;  ); G(h;  ); B (h;  ); r (h;  ))T :      (8)
+In a face (S, T), deﬁned by shape and texture coefﬁcients   j and                       1                  2
+  j (Equation 1), vertex i with texture values (R i ; Gi ; B i ) and
+cylindrical coordinates (r i ; h i ;   i ) is mapped to I model (h i ;   i ) =
+(Ri ; Gi ; Bi ; r i ) T . The matching algorithm from the previous sec-
+tion now determines   j and   j minimizing
+      E = X kIinput (h;  )   Imodel (h;  )k  :
+                   h;
+                                                                                3                  4
+5  Building a morphable model
+
+In this section, we describe how to build the morphable model from
+a set of unregistered 3D prototypes, and to add a new face to the
+existing morphable model, increasing its dimensionality.
+  The key problem is to compute a dense point-to-point correspon-
+dence between the vertices of the faces. Since the method described
+in Section 4.1 ﬁnds the best match of a given face only within the                       5                 6                  7
+range of the morphable model, it cannot add new dimensions to the
+vector space of faces. To determine residual deviations between a                                                                    Figure 6: Matching a morphable model to a single image (1) of anovel face and the best match within the model, as well as to set                                                                       face results in a 3D shape (2) and a texture map estimate. The tex-unregistered prototypes in correspondence, we use an optic ﬂow al-                                                                            ture estimate can be improved by additional texture extraction (4).gorithm that computes correspondence between two faces without                                                         The 3D model is rendered back into the image after changing facialthe need of a morphable model [35]. The following section sum-                                                                                  attributes, such as gaining (3) and loosing weight (5), frowning (6),marizes this technique.                                                                       or being forced to smile (7).
+5.1  3D Correspondence using Optic Flow
+Initially designed to ﬁnd corresponding points in grey-level images       faces in the database. Therefore, we modiﬁed a bootstrapping al-
+I (x; y ), a gradient-based optic ﬂow algorithm [2] is modiﬁed to es-      gorithm to iteratively improve correspondence, a method that has
+tablish correspondence between a pair of 3D scans I(h;  ) (Equa-      been used previously to build linear image models [36].
+tion 8), taking into account color and radius values simultaneously        The basic recursive step: Suppose that an existing morphable
+[35]. The algorithm computes a ﬂow ﬁeld ( h(h;  );   (h;  )) that     model is not powerful enough to match a new face and thereby ﬁnd
+minimizes differences of kI (h;  )  I (h + h; +   )k in a norm      correspondence with it. The idea is ﬁrst to ﬁnd rough correspon-
+that weights variations in texture and shape equally. Surface prop-      dences to the novel face using the (inadequate) morphable model
+erties from differential geometry, such as mean curvature, may be      and then to improve these correspondences by using an optic ﬂow
+used as additional components in I(h;  ).                               algorithm.
+  On facial regions with little structure in texture and shape, such          Starting from an arbitrary face as the temporary reference, pre-
+as forehead and cheeks, the results of the optic ﬂow algorithm are      liminary correspondence between all other faces and this reference
+sometimes spurious. We therefore perform a smooth interpolation        is computed using the optic ﬂow algorithm. On the basis of these
+based on simulated relaxation of a system of ﬂow vectors that are      correspondences, shape and texture vectors S and T can be com-
+coupled with their neighbors. The quadratic coupling potential is      puted. Their average serves as a new reference face. The ﬁrst mor-
+equal for all ﬂow vectors. On high-contrast areas, components of      phable model is then formed by the most signiﬁcant components
+ﬂow vectors orthogonal to edges are bound to the result of the pre-      as provided by a standard PCA decomposition. The current mor-
+vious optic ﬂow computation. The system is otherwise free to take      phable model is now matched to each of the 3D faces according
+on a smooth minimum-energy arrangement. Unlike simple ﬁlter-       to the method described in Section 4.1. Then, the optic ﬂow algo-
+ing routines, our technique fully retains matching quality wherever      rithm computes correspondence between the 3D face and the ap-
+the ﬂow ﬁeld is reliable. Optic ﬂow and smooth interpolation are      proximation provided by the morphable model. Combined with the
+computed on several consecutive levels of resolution.                  correspondence implied by the matched model, this deﬁnes a new
+   Constructing a morphable face model from a set of unregistered      correspondence between the reference face and the example.
+3D scans requires the computation of the ﬂow ﬁelds between each          Iterating this procedure with increasing expressive power of the
+face and an arbitrary reference face. Given a deﬁnition of shape and     model (by increasing the number of principal components) leads to
+texture vectors S r ef and T r ef for the reference face, S and T for       reliable correspondences between the reference face and the exam-
+each face in the database can be obtained by means of the point-to-       ples, and ﬁnally to a complete morphable face model.
+point correspondence provided by ( h(h;  );   (h;  )).
+                                        6  Results5.2  Bootstrapping the model
+Because the optic ﬂow algorithm does not incorporate any con-    We built a morphable face model by automatically establishing cor-
+straints on the set of solutions, it fails on some of the more unusual      respondence between all of our 200 exemplar faces. Our interactive
+        Original                 Initialization                        3D Reconstruction
+
+
+
+
+
+     Reconstruction        Texture Extraction
+   of Shape & Texture   & Facial Expression       Cast Shadow       New Illumination           Rotation
+
+Figure 7: After manual initialization, the algorithm automatically matches a colored morphable model (color contrast set to zero) to the
+image. Rendering the inner part of the 3D face on top of the image, new shadows, facial expressions and poses can be generated.
+
+face modeling system enables human users to create new characters       painting to novel views. For new illumination, we render two im-
+and to modify facial attributes by varying the model coefﬁcients.      ages of the reconstructed 3D face with different illumination, and
+Within the constraints imposed by prior probability, there is a large      multiply relative changes in pixel values (Figure 8, bottom left) by
+variability of possible faces, and all linear combinations of the ex-       the original values in the painting (bottom center). For a new pose
+emplar faces look natural.                                          (bottom right), differences in shading are transferred in a similar
+  We tested the expressive power of our morphable model by au-      way, and the painting is then warped according to the 2D projec-
+tomatically reconstructing 3D faces from photographs of arbitrary       tions of 3D vertex displacements of the reconstructed shape.
+Caucasian faces of middle age that were not in the database. The
+images were either taken by us using a digital camera (Figures 4, 5),    7  Future work
+or taken under arbitrary unknown conditions (Figures 6, 7).
+                                                                     Issues of implementation: We plan to speed up our matching algo-   In all examples, we matched a morphable model built from the
+                                                                    rithm by implementing a simpliﬁed Newton-method for minimizingﬁrst  00 shape and the ﬁrst  00 texture principal components that
+                                                                        the cost function (Equation 5). Instead of the time consuming com-were derived from the whole dataset of 00 faces. Each component
+                                                                        putation of derivatives for each iteration step, a global mapping ofwas additionally segmented in 4 parts (see Figure 2). The whole
+                                                                        the matching error into parameter space can be used [9].matching procedure was performed in  0  iterations. On an SGI
+R10000 processor, computation time was  0 minutes.                   Data reduction applied to shape and texture data will reduce
+                                                                redundancy of our representation, saving additional computation   Reconstructing the true 3D shape and texture of a face from a
+                                                                         time.single image is an ill-posed problem. However, to human observers
+who also know only the input image, the results obtained with our     Extending the database: While the current database is sufﬁcient
+                                                                           to model Caucasian faces of middle age, we would like to extend itmethod look correct. When compared with a real image of the ro-
+                                                                           to children, to elderly people as well as to other races.tated face, differences usually become only visible for large rota-
+tions of more than  0  .                                We also plan to incorporate additional 3D face examples repre-
+                                                                        senting the time course of facial expressions and visemes, the face  There is a wide variety of applications for 3D face reconstruction
+                                                                           variations during speech.from 2D images. As demonstrated in Figures 6 and 7, the results
+can be used for automatic post-processing of a face within the orig-       The laser scanning technology we used, unfortunately, does not
+inal picture or movie sequence.                                       allow us to collect dynamical 3D face data, as each scanning cycle
+                                                                        takes at least 10 seconds. Consequently, our current example set  Knowing the 3D shape of a face in an image provides a segmen-
+                                                                       of facial expressions is restricted to those that can be kept static bytation of the image into face area and background. The face can be
+                                                                        the scanned subjects. However, the development of fast optical 3Dcombined with other 3D graphic objects, such as glasses or hats,
+                                                                               digitizers [27] will allow us to apply our method to streams of 3Dand then be rendered in front of the background, computing cast
+                                                                       data during speech and facial expressions.shadows or new illumination conditions (Fig. 7). Furthermore, we
+can change the appearance of the face by adding or subtracting spe-     Extending the face model: Our current morphable model is re-
+ciﬁc attributes. If previously unseen backgrounds become visible,       stricted to the face area, because a sufﬁcient 3D model of hair can-
+we ﬁll the holes with neighboring background pixels (Fig. 6).            not be obtained with our laser scanner. For animation, the missing
+                                                                            part of the head can be automatically replaced by a standard hair  We also applied the method to paintings such as Leonardo’s
+                                                                              style or a hat, or by hair that is modeled using interactive manualMona Lisa (Figure 8). Due to unusual (maybe unrealistic) light-
+                                                                   segmentation and adaptation to a 3D model [30, 28]. Automateding, illumination-corrected texture extraction is difﬁcult here. We
+                                                                        reconstruction of hair styles from images is one of the future chal-therefore apply a different method for transferring all details of the
+                                                                          lenges.
+                                                                                           [13]  L.G. Farkas.  Anthropometry of the Head and Face.  RavenPress, New York,
+                                                                                          1994.
+                                                                                           [14]  B. Guenter, C. Grimm, D. Wolf, H. Malvar, and F. Pighin. Making faces.  In
+                                                                                Computer Graphics Proceedings SIGGRAPH’98, pages 55–66, 1998.
+                                                                                           [15]  I.T. Jollife. Principal Component Analysis. Springer-Verlag, New York, 1986.
+                                                                                           [16] M. Jones and T. Poggio. Multidimensional morphable models: A framework for
+                                                                                                  representing and matching object classes. In Proceedings of the Sixth Interna-
+                                                                                                       tional Conference on Computer Vision, Bombay, India, 1998.
+                                                                                           [17]  R. M. Koch, M. H. Gross, and A. A. Bosshard. Emotion editing using ﬁnite
+                                                                                               elements.  In Proceedings of the Eurographics ’98, COMPUTER GRAPHICS
+                                                                                    Forum, Vol. 17, No. 3, pages C295–C302, Lisbon, Portugal, 1998.
+                                                                                           [18] A. Lanitis, C.J. Taylor, and T.F. Cootes. Automatic interpretation and coding of
+                                                                                                  face images using ﬂexible models. IEEE Transactions on Pattern Analysis and
+                                                                                 Machine Intelligence, 19(7):743–756, 1997.
+                                                                                           [19]  Y.C. Lee, D. Terzopoulos, and Keith Waters.  Constructing physics-based fa-
+                                                                                                                cial models of individuals. Visual Computer, Proceedings of Graphics Interface
+                                                                                                ’93:1–8, 1993.
+Figure 8:  Reconstructed 3D face of Mona Lisa (top center and
+right).  For modifying the illumination, relative changes in color        [20]  Y.C. Lee, D. Terzopoulos, and Keith Waters. Realistic modeling for facial ani-                                                                                             mation. In SIGGRAPH ’95 Conference Proceedings, pages 55–62, Los Angels,
+(bottom left) are computed on the 3D face, and then multiplied by             1995. ACM.
+the color values in the painting (bottom center). Additional warping
+generates new orientations (bottom right, see text), while details of        [21]  J. P. Lewis. Algorithms for solid noise synthesis. In SIGGRAPH ’89 Conference                                                                                            Proceedings, pages 263–270. ACM, 1989.the painting, such as brush strokes or cracks, are retained.
+                                                                                           [22] N. Magneneat-Thalmann, H. Minh, M. Angelis, and D. Thalmann. Design, trans-
+                                                                                            formation and animation of human faces. Visual Computer, 5:32–39, 1989.
+8  Acknowledgment                                                   [23]  L. Moccozet and N. Magnenat-Thalmann. Dirichlet free-form deformation and
+We thank Michael Langer, Alice O’Toole, Tomaso Poggio, Hein-                their application to hand simulation. In Computer Animation’97, 1997.
+rich B¨ulthoff and Wolfgang Straßer for reading the manuscript and        [24]  F. I. Parke and K. Waters. Computer Facial Animation. AKPeters, Wellesley,
+for many insightful and constructive comments. In particular, we             Massachusetts, 1996.
+thank Marney Smyth and Alice O’Toole for their perseverance in        [25]  F.I. Parke. Computer generated animation of faces. In ACM National Confer-
+helping us to obtain the following. Photo Credits: Original im-              ence. ACM, November 1972.
+age in Fig. 6: Courtesy of Paramount/VIACOM. Original image in        [26]  F.I. Parke. A Parametric Model of Human Faces. PhD thesis, University of Utah,
+Fig. 7: MPTV/interTOPICS.                                                                  Salt Lake City, 1974.
+                                                                                           [27] M. Petrow, A. Talapov, T. Robertson, A. Lebedev, A. Zhilyaev, and L. Polonskiy.
+                                                                                                Optical 3D digitizer: Bringing life to virtual world. IEEE Computer GraphicsReferences
+                                                                                 and Applications, 18(3):28–37, 1998.
+ [1]  T. Akimoto, Y. Suenaga, and R.S. Wallace.  Automatic creation of 3D facial                                                                                           [28]  F. Pighin, J. Hecker, D. Lischinski, Szeliski R, and D. Salesin. Synthesizing re-
+     models. IEEE Computer Graphics and Applications, 13(3):16–22, 1993.                                                                                                                      alistic facial expressions from photographs. In Computer Graphics Proceedings
+ [2]  J.R. Bergen and R. Hingorani. Hierarchical motion-based frame rate conversion.           SIGGRAPH’98, pages 75–84, 1998.
+      Technical report, David Sarnoff Research Center Princeton NJ 08540, 1990.                                                                                           [29]  S. Platt and N. Badler.  Animating facial expression.  Computer Graphics,
+ [3]  P. Bergeron and P. Lachapelle. Controlling facial expressions and body move-             15(3):245–252, 1981.
+     ments. In Advanced Computer Animation, SIGGRAPH ’85 Tutorials, volume 2,                                                                                           [30] G. Sannier and N. Magnenat-Thalmann. A user-friendly texture-ﬁtting method-
+     pages 61–79, New York, 1985. ACM.                                                                                         ology for virtual humans. In Computer Graphics International’97, 1997.
+ [4] D. Beymer and T. Poggio. Image representation for visual learning.  Science,                                                                                           [31]  L. Sirovich and M. Kirby. Low-dimensional procedure for the characterization
+     272:1905–1909, 1996.                                                                                                of human faces. Journal of the Optical Society of America A, 4:519–554, 1987.
+ [5] D. Beymer, A. Shashua, and T. Poggio. Example-based image analysis and syn-                                                                                           [32] D. Terzopoulos and Keith Waters. Physically-based facial modeling, analysis,       thesis.  A.I. Memo No. 1431, Artiﬁcial Intelligence Laboratory, Massachusetts                                                                                    and animation. Visualization and Computer Animation, 1:73–80, 1990.       Institute of Technology, 1993.
+                                                                                           [33]  Demetri Terzopoulos and Hong Qin.  Dynamic NURBS with geometric con- [6]  S. E. Brennan. The caricature generator. Leonardo, 18:170–178, 1985.
+                                                                                                                straints to interactive sculpting. ACM Transactions on Graphics, 13(2):103–136,
+ [7]  P.J. Burt and E.H. Adelson.  Merging images through pattern decomposition.              April 1994.
+      In Applications of Digital Image Processing VIII, number 575, pages 173–181.
+                                                                                           [34]  J. T. Todd, S. M. Leonard, R. E. Shaw, and J. B. Pittenger. The perception of     SPIE The International Society for Optical Engeneering, 1985.
+                                                                          human growth. Scientiﬁc American, 1242:106–114, 1980.
+ [8]  C.S. Choi, T. Okazaki, H. Harashima, and T. Takebe. A system of analyzing and
+                                                                                           [35]  T. Vetter and V. Blanz. Estimating coloured 3d face models from single images:      synthesizing facial images. In Proc. IEEE Int. Symposium of Circuit and Syatems
+                                                                  An example based approach.  In Burkhardt and Neumann, editors, Computer     (ISCAS91), pages 2665–2668, 1991.
+                                                                                                 Vision – ECCV’98 Vol. II, Freiburg, Germany, 1998. Springer, Lecture Notes in
+ [9]  T.F. Cootes, G.J. Edwards, and C.J. Taylor.  Active appearance models.  In            Computer Science 1407.
+     Burkhardt and Neumann, editors, Computer Vision – ECCV’98 Vol. II, Freiburg,
+                                                                                           [36]  T. Vetter, M. J. Jones, and T. Poggio. A bootstrapping algorithm for learning     Germany, 1998. Springer, Lecture Notes in Computer Science 1407.
+                                                                                                          linear models of object classes. In IEEE Conference on Computer Vision and
+[10] D. DeCarlos, D. Metaxas, and M. Stone. An anthropometric face model us-              Pattern Recognition – CVPR’97, Puerto Rico, USA, 1997. IEEE Computer So-
+      ing variational techniques. In Computer Graphics Proceedings SIGGRAPH’98,               ciety Press.
+     pages 67–74, 1998.
+                                                                                           [37]  T. Vetter and T. Poggio. Linear object classes and image synthesis from a single
+[11]  S. DiPaola. Extending the range of facial types. Journal of Visualization and            example image. IEEE Transactions on Pattern Analysis and Machine Intelli-
+     Computer Animation, 2(4):129–131, 1991.                                                gence, 19(7):733–742, 1997.
+[12]  G.J. Edwards, A. Lanitis, C.J. Taylor, and T.F. Cootes. Modelling the variability        [38]  Keith Waters. A muscle model for animating three-dimensional facial expres-
+      in face images. In Proc. of the 2nd Int. Conf. on Automatic Face and Gesture               sion. Computer Graphics, 22(4):17–24, 1987.
+      Recognition, IEEE Comp. Soc. Press, Los Alamitos, CA, 1996.

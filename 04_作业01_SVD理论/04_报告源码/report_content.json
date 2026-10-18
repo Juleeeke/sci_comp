@@ -1,0 +1,1473 @@
+[
+  {
+    "title": "Reading guide and notation",
+    "blocks": [
+      {
+        "kind": "paragraph",
+        "text": "This report answers all 15 problems in the supplied SVD homework assignment and the optional complex-matrix challenge. Each numbered subsection follows the corresponding task in the assignment. Complete executable Python code appears in Appendix A; numerical tables, plots and reconstructed images are included in Problems 12 and 13."
+      },
+      {
+        "kind": "heading",
+        "text": "Organization"
+      },
+      {
+        "kind": "table",
+        "headers": [
+          "Problems",
+          "Topics"
+        ],
+        "rows": [
+          [
+            "1-4",
+            "Singular vectors, existence, compact SVD and the four fundamental subspaces"
+          ],
+          [
+            "5-8",
+            "Norms, pseudoinverse and full-rank/rank-deficient least squares"
+          ],
+          [
+            "9-11",
+            "Optimal approximation, storage counts and principal component analysis"
+          ],
+          [
+            "12",
+            "Grayscale image compression at ranks 5, 10, 20, 50 and 100"
+          ],
+          [
+            "13",
+            "Rank-five signal with Gaussian noise; ranks 1 through 20"
+          ],
+          [
+            "14-15",
+            "Regularization and a one-page synthesis essay"
+          ],
+          [
+            "Challenge",
+            "Complex SVD and the conjugate transpose"
+          ],
+          [
+            "Appendix A",
+            "Full source code and reproduction instructions"
+          ]
+        ]
+      },
+      {
+        "kind": "heading",
+        "text": "Conventions"
+      },
+      {
+        "kind": "paragraph",
+        "text": "Unless specified otherwise, matrices are real. The rank is r; positive singular values are ordered from largest to smallest. Full U and V are orthogonal; compact factors contain only the r positive modes. The symbol e_i denotes the appropriate standard basis vector. The Frobenius inner product is the trace of the transpose of the first matrix times the second matrix."
+      },
+      {
+        "kind": "equation",
+        "latex": "A=U\\Sigma V^T=U_r\\Sigma_r V_r^T,\\qquad \\sigma_1\\ge\\cdots\\ge\\sigma_r>0."
+      },
+      {
+        "kind": "paragraph",
+        "text": "The zero matrix has an empty compact SVD and norm zero. Empty sums and empty spans are interpreted as zero and the zero subspace. Where a relative error is used, the reference matrix is nonzero. PCA assumes at least two observations and subtracts the column means."
+      },
+      {
+        "kind": "heading",
+        "text": "A convention that matters in Problem 12"
+      },
+      {
+        "kind": "equation",
+        "latex": "\\rho_k=\\frac{k(m+n+1)}{mn},\\qquad E_k=\\frac{\\left\\|A-A_k\\right\\|_F}{\\left\\|A\\right\\|_F}."
+      },
+      {
+        "kind": "paragraph",
+        "text": "The assignment calls rho_k a compression ratio, but it is compressed scalar count divided by original scalar count. Smaller is better; rho_k < 1 means fewer scalars. Its reciprocal is a different convention. The report uses the assignment convention throughout. Scalar counts do not by themselves measure encoded file size."
+      }
+    ]
+  },
+  {
+    "title": "Problem 1. Singular values and singular vectors",
+    "blocks": [
+      {
+        "kind": "heading",
+        "text": "1. Symmetry and positive semidefiniteness"
+      },
+      {
+        "kind": "equation",
+        "latex": "(A^TA)^T=A^TA,\\qquad x^TA^TAx=\\left\\|Ax\\right\\|_2^2\\ge0."
+      },
+      {
+        "kind": "paragraph",
+        "text": "The transpose identity proves symmetry. The quadratic-form identity holds for every real vector x and proves positive semidefiniteness, even when A is rectangular or rank deficient."
+      },
+      {
+        "kind": "heading",
+        "text": "2. Nonnegative eigenvalues"
+      },
+      {
+        "kind": "paragraph",
+        "text": "A real symmetric matrix has real eigenvalues and real eigenvectors. For any nonzero eigenvector v with eigenvalue lambda, multiplication by its transpose gives:"
+      },
+      {
+        "kind": "equation",
+        "latex": "\\lambda=\\frac{v^TA^TAv}{v^Tv}=\\frac{\\left\\|Av\\right\\|_2^2}{\\left\\|v\\right\\|_2^2}\\ge0."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Thus every eigenvalue is nonnegative, and its nonnegative square root is well defined."
+      },
+      {
+        "kind": "heading",
+        "text": "3. Norm identity for an eigenvector"
+      },
+      {
+        "kind": "equation",
+        "latex": "\\left\\|Av_i\\right\\|_2^2=v_i^TA^TAv_i=\\sigma_i^2\\left\\|v_i\\right\\|_2^2."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Taking nonnegative square roots yields the required identity. This also holds at sigma_i = 0, in which case Av_i = 0."
+      },
+      {
+        "kind": "heading",
+        "text": "4. Normalization of the left singular vector"
+      },
+      {
+        "kind": "equation",
+        "latex": "u_i=\\frac{Av_i}{\\sigma_i},\\qquad \\left\\|u_i\\right\\|_2=\\frac{\\left\\|Av_i\\right\\|_2}{\\sigma_i}=1."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Here v_i has unit norm and sigma_i is strictly positive. Division by a zero singular value is not used."
+      },
+      {
+        "kind": "heading",
+        "text": "5. Geometric interpretation"
+      },
+      {
+        "kind": "paragraph",
+        "text": "Along the unit direction v_i, A maps a unit displacement to sigma_i times the unit direction u_i. The right orthogonal factor first changes input coordinates, the rectangular diagonal factor stretches or annihilates each coordinate, and the left orthogonal factor changes output coordinates. Consequently a unit sphere maps to an ellipsoid in the range of A with positive semiaxis lengths sigma_i. Directions in the null space collapse to zero. Orthogonal factors may include reflections as well as rotations."
+      }
+    ]
+  },
+  {
+    "title": "Problem 2. Existence of the SVD",
+    "blocks": [
+      {
+        "kind": "heading",
+        "text": "1-2. Begin with the spectral theorem"
+      },
+      {
+        "kind": "equation",
+        "latex": "A^TA=V\\Lambda V^T,\\qquad \\Lambda=\\operatorname{diag}(\\lambda_1,\\ldots,\\lambda_n)."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Because A-transpose A is real symmetric, the spectral theorem supplies an orthonormal eigenbasis, including within repeated-eigenvalue eigenspaces. Positive semidefiniteness gives nonnegative eigenvalues. Order them decreasingly. Since its null space equals that of A, exactly r eigenvalues are positive. Set sigma_i equal to the square root of lambda_i for i = 1,...,r."
+      },
+      {
+        "kind": "heading",
+        "text": "3. Orthonormality of the positive left modes"
+      },
+      {
+        "kind": "equation",
+        "latex": "u_i=\\frac{Av_i}{\\sigma_i},\\qquad u_i^Tu_j=\\frac{v_i^TA^TAv_j}{\\sigma_i\\sigma_j}=\\frac{\\sigma_j^2}{\\sigma_i\\sigma_j}\\delta_{ij}=\\delta_{ij}."
+      },
+      {
+        "kind": "paragraph",
+        "text": "This proves both normalization and pairwise orthogonality. In particular, r cannot exceed m."
+      },
+      {
+        "kind": "heading",
+        "text": "4. Complete the output basis"
+      },
+      {
+        "kind": "paragraph",
+        "text": "The r vectors already constructed form an orthonormal set in real m-dimensional space. Extend them to a basis by applying Gram-Schmidt to suitable vectors outside their span, or by choosing an orthonormal basis of the orthogonal complement. Use these additional vectors as columns r+1 through m of U. If r = 0, any orthogonal U works."
+      },
+      {
+        "kind": "heading",
+        "text": "5. Establish the factorization"
+      },
+      {
+        "kind": "paragraph",
+        "text": "For positive modes, Av_i = sigma_i u_i. For the remaining eigenvectors, the norm identity in Problem 1 gives Av_i = 0. Define the m-by-n rectangular diagonal matrix Sigma with the positive sigma_i on its first r diagonal positions and zeros elsewhere. Then the columns of AV and U Sigma agree:"
+      },
+      {
+        "kind": "equation",
+        "latex": "AV=U\\Sigma,\\qquad A=U\\Sigma V^T."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Both U and V are square orthogonal matrices. This construction covers all real matrix shapes, all ranks, repeated singular values and the zero matrix; it therefore proves existence of the real SVD."
+      }
+    ]
+  },
+  {
+    "title": "Problem 3. Compact SVD and outer products",
+    "blocks": [
+      {
+        "kind": "heading",
+        "text": "1. Expand the product by its diagonal entries"
+      },
+      {
+        "kind": "equation",
+        "latex": "A=\\sum_{i=1}^{r}U_re_i\\sigma_i e_i^TV_r^T=\\sum_{i=1}^{r}\\sigma_i u_i v_i^T."
+      },
+      {
+        "kind": "heading",
+        "text": "2. Rank of each outer product"
+      },
+      {
+        "kind": "paragraph",
+        "text": "For any vector x, u_i v_i-transpose x is a scalar multiple of u_i, so its range has dimension at most one. Taking x = v_i produces u_i, a nonzero vector. Thus its range is exactly the span of u_i and its rank is one."
+      },
+      {
+        "kind": "heading",
+        "text": "3. Orthogonality of the components"
+      },
+      {
+        "kind": "equation",
+        "latex": "\\left\\langle u_i v_i^T,u_j v_j^T\\right\\rangle_F=\\operatorname{tr}(v_i u_i^Tu_j v_j^T)=(u_i^Tu_j)(v_j^Tv_i)=\\delta_{ij}."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Hence distinct rank-one terms are orthogonal in the Frobenius inner product. Their squared norms add, and the norm of sigma_i u_i v_i-transpose is sigma_i."
+      },
+      {
+        "kind": "heading",
+        "text": "4. Compact SVD of the given matrix"
+      },
+      {
+        "kind": "equation",
+        "latex": "A=\\begin{pmatrix}3&0\\\\0&2\\\\0&0\\end{pmatrix},\\quad U_r=\\begin{pmatrix}1&0\\\\0&1\\\\0&0\\end{pmatrix},\\quad \\Sigma_r=\\begin{pmatrix}3&0\\\\0&2\\end{pmatrix},\\quad V_r=\\begin{pmatrix}1&0\\\\0&1\\end{pmatrix}."
+      },
+      {
+        "kind": "paragraph",
+        "text": "The compact factors have dimensions 3-by-2, 2-by-2 and 2-by-2. The singular values are 3 and 2 and the rank is two. Indeed A-transpose A is diag(9,4)."
+      },
+      {
+        "kind": "heading",
+        "text": "5. Explicit outer product expansion"
+      },
+      {
+        "kind": "equation",
+        "latex": "A=3\\begin{pmatrix}1\\\\0\\\\0\\end{pmatrix}\\begin{pmatrix}1&0\\end{pmatrix}+2\\begin{pmatrix}0\\\\1\\\\0\\end{pmatrix}\\begin{pmatrix}0&1\\end{pmatrix}."
+      },
+      {
+        "kind": "equation",
+        "latex": "A=\\begin{pmatrix}3&0\\\\0&0\\\\0&0\\end{pmatrix}+\\begin{pmatrix}0&0\\\\0&2\\\\0&0\\end{pmatrix}."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Paired sign reversals of corresponding columns of U_r and V_r leave these products unchanged, so singular vectors need not be unique."
+      }
+    ]
+  },
+  {
+    "title": "Problem 4. The four fundamental subspaces",
+    "blocks": [
+      {
+        "kind": "heading",
+        "text": "1. Column space of A"
+      },
+      {
+        "kind": "equation",
+        "latex": "Ax=\\sum_{i=1}^{r}\\sigma_i u_i(v_i^Tx),\\qquad u_i=A\\left(\\frac{v_i}{\\sigma_i}\\right)."
+      },
+      {
+        "kind": "paragraph",
+        "text": "The first equation puts every output in the span of the first r left singular vectors. The second puts each of those vectors in the range of A. Both inclusions prove equality."
+      },
+      {
+        "kind": "heading",
+        "text": "2. Null space of A"
+      },
+      {
+        "kind": "paragraph",
+        "text": "Expand x in the full orthonormal right basis. Orthogonality of the left modes gives the following condition:"
+      },
+      {
+        "kind": "equation",
+        "latex": "x=\\sum_{i=1}^{n}c_i v_i,\\qquad Ax=\\sum_{i=1}^{r}\\sigma_i c_i u_i=0\\ \\Longleftrightarrow\\ c_1=\\cdots=c_r=0."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Thus the null space is exactly the span of v_(r+1),...,v_n."
+      },
+      {
+        "kind": "heading",
+        "text": "3. Row space, viewed as the range of A-transpose"
+      },
+      {
+        "kind": "equation",
+        "latex": "A^Ty=\\sum_{i=1}^{r}\\sigma_i v_i(u_i^Ty),\\qquad v_i=A^T\\left(\\frac{u_i}{\\sigma_i}\\right)."
+      },
+      {
+        "kind": "paragraph",
+        "text": "The same two-inclusion argument proves that the range of A-transpose equals the span of v_1,...,v_r."
+      },
+      {
+        "kind": "heading",
+        "text": "4. Left null space"
+      },
+      {
+        "kind": "equation",
+        "latex": "y=\\sum_{i=1}^{m}d_i u_i,\\qquad A^Ty=0\\ \\Longleftrightarrow\\ d_1=\\cdots=d_r=0."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Therefore the null space of A-transpose is the span of u_(r+1),...,u_m."
+      },
+      {
+        "kind": "heading",
+        "text": "5. All four bases and dimensions"
+      },
+      {
+        "kind": "table",
+        "headers": [
+          "Subspace",
+          "Orthonormal basis",
+          "Dimension"
+        ],
+        "rows": [
+          [
+            "Range of A",
+            "u_1,...,u_r",
+            "r"
+          ],
+          [
+            "Null space of A",
+            "v_(r+1),...,v_n",
+            "n-r"
+          ],
+          [
+            "Range of A-transpose",
+            "v_1,...,v_r",
+            "r"
+          ],
+          [
+            "Null space of A-transpose",
+            "u_(r+1),...,u_m",
+            "m-r"
+          ]
+        ]
+      },
+      {
+        "kind": "paragraph",
+        "text": "In the input space, the row space and null space are orthogonal complements. In the output space, the column space and left null space are orthogonal complements. Empty bases cover full-rank and zero-rank edge cases."
+      }
+    ]
+  },
+  {
+    "title": "Problem 5. Matrix norms and singular values",
+    "blocks": [
+      {
+        "kind": "heading",
+        "text": "1. Spectral norm"
+      },
+      {
+        "kind": "paragraph",
+        "text": "For a unit vector x, write y = V-transpose x. Orthogonality preserves its norm. The output norm satisfies:"
+      },
+      {
+        "kind": "equation",
+        "latex": "\\left\\|Ax\\right\\|_2^2=\\sum_{i=1}^{r}\\sigma_i^2 y_i^2\\le\\sigma_1^2\\sum_{i=1}^{n}y_i^2=\\sigma_1^2."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Equality is attained at x = v_1 for a nonzero matrix. Taking the supremum gives the spectral norm sigma_1. For A = 0 the norm is zero."
+      },
+      {
+        "kind": "heading",
+        "text": "2. Frobenius norm"
+      },
+      {
+        "kind": "equation",
+        "latex": "\\left\\|A\\right\\|_F^2=\\operatorname{tr}(A^TA)=\\operatorname{tr}(V\\Sigma^T\\Sigma V^T)=\\sum_{i=1}^{r}\\sigma_i^2."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Cyclic invariance of the trace and V-transpose V = I remove the orthogonal factors. Taking the square root proves the stated formula. Equivalently, use the mutually orthogonal rank-one terms in Problem 3."
+      },
+      {
+        "kind": "heading",
+        "text": "3. Connection with the largest eigenvalue"
+      },
+      {
+        "kind": "equation",
+        "latex": "\\left\\|A\\right\\|_2^2=\\sigma_1^2=\\lambda_{\\max}(A^TA)."
+      },
+      {
+        "kind": "paragraph",
+        "text": "This follows from the singular-value definition or from maximizing the Rayleigh quotient of A-transpose A over unit vectors."
+      },
+      {
+        "kind": "heading",
+        "text": "4. Norm of an inverse"
+      },
+      {
+        "kind": "paragraph",
+        "text": "If A is square and nonsingular, every singular value is positive, and its inverse factorization is:"
+      },
+      {
+        "kind": "equation",
+        "latex": "A^{-1}=V\\Sigma^{-1}U^T,\\qquad \\left\\|A^{-1}\\right\\|_2=\\max_i\\frac{1}{\\sigma_i}=\\frac{1}{\\sigma_n}."
+      },
+      {
+        "kind": "heading",
+        "text": "5. Spectral condition number"
+      },
+      {
+        "kind": "equation",
+        "latex": "\\kappa_2(A)=\\left\\|A\\right\\|_2\\left\\|A^{-1}\\right\\|_2=\\frac{\\sigma_1}{\\sigma_n}."
+      },
+      {
+        "kind": "paragraph",
+        "text": "A small final singular value makes inversion sensitive because its reciprocal is large. For a singular square matrix, the usual inverse-based condition number is infinite rather than a finite ratio of only the nonzero singular values."
+      }
+    ]
+  },
+  {
+    "title": "Problem 6. Moore-Penrose pseudoinverse",
+    "blocks": [
+      {
+        "kind": "heading",
+        "text": "1. Rectangular diagonal pseudoinverse, m > n"
+      },
+      {
+        "kind": "equation",
+        "latex": "\\Sigma^+=\\begin{pmatrix}D_r^{-1}&0_{r\\times(m-r)}\\\\0_{(n-r)\\times r}&0_{(n-r)\\times(m-r)}\\end{pmatrix},\\quad D_r=\\operatorname{diag}(\\sigma_1,\\ldots,\\sigma_r)."
+      },
+      {
+        "kind": "paragraph",
+        "text": "This is an n-by-m matrix. The first r diagonal entries are reciprocal positive singular values and all remaining entries are zero. Empty blocks are omitted when r = n; when r = 0 the entire pseudoinverse is zero."
+      },
+      {
+        "kind": "heading",
+        "text": "2. Four Moore-Penrose conditions"
+      },
+      {
+        "kind": "equation",
+        "latex": "A^+=V_rD_r^{-1}U_r^T,\\qquad AA^+=U_rU_r^T,\\qquad A^+A=V_rV_r^T."
+      },
+      {
+        "kind": "paragraph",
+        "text": "The last two matrices are symmetric orthogonal projectors. Since U_r-transpose U_r and V_r-transpose V_r are identities, multiplication yields:"
+      },
+      {
+        "kind": "equation",
+        "latex": "AA^+A=U_rU_r^TU_rD_rV_r^T=A,\\qquad A^+AA^+=V_rV_r^TV_rD_r^{-1}U_r^T=A^+."
+      },
+      {
+        "kind": "equation",
+        "latex": "(AA^+)^T=AA^+,\\qquad (A^+A)^T=A^+A."
+      },
+      {
+        "kind": "heading",
+        "text": "3. Square nonsingular case"
+      },
+      {
+        "kind": "paragraph",
+        "text": "When r = m = n, both projectors equal the identity. Thus A-plus is a two-sided inverse and equals A-inverse; its SVD is V Sigma-inverse U-transpose."
+      },
+      {
+        "kind": "heading",
+        "text": "4-5. Given example and direct verification"
+      },
+      {
+        "kind": "equation",
+        "latex": "A=\\begin{pmatrix}1&0\\\\0&2\\\\0&0\\end{pmatrix},\\qquad A^+=\\begin{pmatrix}1&0&0\\\\0&1/2&0\\end{pmatrix}."
+      },
+      {
+        "kind": "equation",
+        "latex": "AA^+=\\begin{pmatrix}1&0&0\\\\0&1&0\\\\0&0&0\\end{pmatrix},\\qquad A^+A=\\begin{pmatrix}1&0\\\\0&1\\end{pmatrix}."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Both displayed products are symmetric. Multiplying the first product by A leaves A unchanged; multiplying the second by A-plus leaves A-plus unchanged. These direct products verify all four conditions for the stated example, rather than only relying on the general formula."
+      }
+    ]
+  },
+  {
+    "title": "Problem 7. Least squares and the pseudoinverse",
+    "blocks": [
+      {
+        "kind": "heading",
+        "text": "1-2. Normal equations and full column rank"
+      },
+      {
+        "kind": "paragraph",
+        "text": "Minimizing the residual norm is equivalent to minimizing one half of its square. Differentiating this convex quadratic gives:"
+      },
+      {
+        "kind": "equation",
+        "latex": "\\nabla_x\\frac12\\left\\|Ax-b\\right\\|_2^2=A^T(Ax-b)=0,\\qquad A^TAx=A^Tb."
+      },
+      {
+        "kind": "paragraph",
+        "text": "If A has full column rank, every nonzero x has positive x-transpose A-transpose A x. Thus A-transpose A is positive definite and invertible, and the strictly convex objective has the unique solution:"
+      },
+      {
+        "kind": "equation",
+        "latex": "x=(A^TA)^{-1}A^Tb."
+      },
+      {
+        "kind": "heading",
+        "text": "3. SVD solution and the minimum norm"
+      },
+      {
+        "kind": "paragraph",
+        "text": "Set y = V-transpose x and c = U-transpose b. Orthogonal invariance splits the squared residual into independently minimized coordinates:"
+      },
+      {
+        "kind": "equation",
+        "latex": "\\left\\|Ax-b\\right\\|_2^2=\\sum_{i=1}^{r}(\\sigma_i y_i-c_i)^2+\\sum_{i=r+1}^{m}c_i^2."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Every least-squares solution has y_i = c_i/sigma_i for i up to r; coordinates r+1 through n are free. Since the squared norm of x is the sum of all y_i squared, its unique minimum occurs when the free coordinates are zero. Hence x = A-plus b for the minimum-norm least-squares solution."
+      },
+      {
+        "kind": "heading",
+        "text": "4. Solve the given example"
+      },
+      {
+        "kind": "equation",
+        "latex": "A^TA=\\begin{pmatrix}3&3\\\\3&5\\end{pmatrix},\\quad A^Tb=\\begin{pmatrix}5\\\\6\\end{pmatrix},\\quad x=\\begin{pmatrix}7/6\\\\1/2\\end{pmatrix}."
+      },
+      {
+        "kind": "paragraph",
+        "text": "The determinant is 6. The equations are 3x_1 + 3x_2 = 5 and 3x_1 + 5x_2 = 6; subtraction gives x_2 = 1/2 and then x_1 = 7/6."
+      },
+      {
+        "kind": "heading",
+        "text": "5-6. Residual and orthogonality"
+      },
+      {
+        "kind": "equation",
+        "latex": "Ax=\\begin{pmatrix}7/6\\\\5/3\\\\13/6\\end{pmatrix},\\quad r=b-Ax=\\begin{pmatrix}-1/6\\\\1/3\\\\-1/6\\end{pmatrix},\\quad A^Tr=\\begin{pmatrix}0\\\\0\\end{pmatrix}."
+      },
+      {
+        "kind": "paragraph",
+        "text": "The first residual dot product is -1/6 + 1/3 - 1/6 = 0; the second is 1/3 - 2/6 = 0. The squared residual norm is 1/6. Thus Ax is the orthogonal projection of b onto the column space of A."
+      }
+    ]
+  },
+  {
+    "title": "Problem 8. Rank-deficient least squares",
+    "blocks": [
+      {
+        "kind": "heading",
+        "text": "1. Why infinitely many solutions occur"
+      },
+      {
+        "kind": "paragraph",
+        "text": "When r < n, the null space is nontrivial and A-transpose A is singular. A least-squares minimizer still exists because the finite-dimensional column space is closed. If x_0 is one minimizer and z lies in the null space, then A(x_0 + z) = Ax_0. Thus every x_0 + z minimizes the same objective, giving infinitely many solutions. The normal equations remain consistent even though they are not invertible."
+      },
+      {
+        "kind": "heading",
+        "text": "2. Proof of minimum norm"
+      },
+      {
+        "kind": "equation",
+        "latex": "x=A^+b+z,\\quad z\\in\\mathcal{N}(A),\\qquad \\left\\|x\\right\\|_2^2=\\left\\|A^+b\\right\\|_2^2+\\left\\|z\\right\\|_2^2."
+      },
+      {
+        "kind": "paragraph",
+        "text": "The first term lies in the row space of A, the span of the positive right modes. The second lies in its orthogonal complement. The Pythagorean identity shows that the unique smallest norm is attained at z = 0."
+      },
+      {
+        "kind": "heading",
+        "text": "3. Given dependent-column example"
+      },
+      {
+        "kind": "paragraph",
+        "text": "Both columns equal a = (1,2,3)-transpose. Write t = x_1 + x_2, so Ax = at. The scalar normal equation gives:"
+      },
+      {
+        "kind": "equation",
+        "latex": "t=\\frac{a^Tb}{a^Ta}=\\frac{1+4+12}{1+4+9}=\\frac{17}{14}."
+      },
+      {
+        "kind": "equation",
+        "latex": "x=\\begin{pmatrix}17/28\\\\17/28\\end{pmatrix}+s\\begin{pmatrix}1\\\\-1\\end{pmatrix},\\qquad s\\in\\mathbb{R}."
+      },
+      {
+        "kind": "paragraph",
+        "text": "The squared norm is 2(17/28)^2 + 2s^2. Consequently the minimum-norm solution is (17/28,17/28)-transpose. Its residual is:"
+      },
+      {
+        "kind": "equation",
+        "latex": "b-Ax=\\begin{pmatrix}-3/14\\\\-3/7\\\\5/14\\end{pmatrix},\\qquad a^T(b-Ax)=0."
+      },
+      {
+        "kind": "heading",
+        "text": "4. Geometric meaning"
+      },
+      {
+        "kind": "paragraph",
+        "text": "The map sends both input coordinates along one output direction. The input direction (1,-1)-transpose is annihilated, so the data cannot identify the two coefficients separately. The fitted vector is the projection onto the line spanned by a; the minimum-norm rule chooses the input orthogonal to the null space."
+      },
+      {
+        "kind": "heading",
+        "text": "5. Numerical reliability"
+      },
+      {
+        "kind": "paragraph",
+        "text": "Forming A-transpose A squares the ratio of positive singular values and can obscure near-zero modes through rounding. SVD exposes those modes directly, supports a scale-dependent numerical-rank threshold, and avoids inversion of a singular normal-equation matrix. A threshold must reflect data accuracy and noise; no algorithm can recover information removed by the null space."
+      }
+    ]
+  },
+  {
+    "title": "Problem 9. Eckart-Young-Mirsky theorem",
+    "blocks": [
+      {
+        "kind": "heading",
+        "text": "1. Rank of the truncation"
+      },
+      {
+        "kind": "equation",
+        "latex": "A_k=U_k\\Sigma_kV_k^T,\\qquad V_k^TA_k^TA_kV_k=\\Sigma_k^2."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Its range is contained in the k-dimensional span of the first k left modes, so its rank is at most k. Each sigma_i for i up to k is positive, and A_k v_i = sigma_i u_i gives k independent outputs. Therefore its rank is exactly k. The case k = 0 gives rank zero."
+      },
+      {
+        "kind": "heading",
+        "text": "2-3. The two optimality statements"
+      },
+      {
+        "kind": "equation",
+        "latex": "\\min_{\\operatorname{rank}(M)\\le k}\\left\\|A-M\\right\\|_2=\\sigma_{k+1}."
+      },
+      {
+        "kind": "equation",
+        "latex": "\\min_{\\operatorname{rank}(M)\\le k}\\left\\|A-M\\right\\|_F=\\left(\\sum_{i=k+1}^{r}\\sigma_i^2\\right)^{1/2}."
+      },
+      {
+        "kind": "paragraph",
+        "text": "For 0 <= k < r, the truncated SVD attains both minima. The formulation uses rank at most k; the displayed truncation itself has rank exactly k. A minimizing approximation need not be unique, especially when singular values at the cutoff coincide."
+      },
+      {
+        "kind": "heading",
+        "text": "4-5. Errors of the truncation"
+      },
+      {
+        "kind": "equation",
+        "latex": "A-A_k=\\sum_{i=k+1}^{r}\\sigma_i u_i v_i^T."
+      },
+      {
+        "kind": "paragraph",
+        "text": "The retained and omitted singular directions are orthogonal, so the singular values of this difference are the omitted sigma_i together with zeros. Problem 5 then gives its spectral norm sigma_(k+1). Alternatively, the Frobenius orthogonality in Problem 3 gives:"
+      },
+      {
+        "kind": "equation",
+        "latex": "\\left\\|A-A_k\\right\\|_F^2=\\sum_{i=k+1}^{r}\\left\\|\\sigma_i u_i v_i^T\\right\\|_F^2=\\sum_{i=k+1}^{r}\\sigma_i^2."
+      },
+      {
+        "kind": "heading",
+        "text": "6. Why the error is globally minimal"
+      },
+      {
+        "kind": "paragraph",
+        "text": "Computing the tail errors alone does not prove optimality. The following continuation proves lower bounds for every competing rank-at-most-k matrix, establishing that no other approximation can do better in either norm."
+      }
+    ]
+  },
+  {
+    "title": "Problem 9 continued. Proof of global optimality",
+    "blocks": [
+      {
+        "kind": "heading",
+        "text": "Spectral-norm lower bound"
+      },
+      {
+        "kind": "paragraph",
+        "text": "Let M have rank at most k. Restrict M to the (k+1)-dimensional space spanned by v_1,...,v_(k+1). This restriction has a nonzero kernel by rank-nullity. Choose a unit vector x in that kernel, so Mx = 0 and x is a combination of these k+1 modes."
+      },
+      {
+        "kind": "equation",
+        "latex": "\\left\\|A-M\\right\\|_2\\ge\\left\\|(A-M)x\\right\\|_2=\\left\\|Ax\\right\\|_2\\ge\\sigma_{k+1}."
+      },
+      {
+        "kind": "paragraph",
+        "text": "The final inequality follows by summing sigma_i squared times the squared coordinates of x; all these sigma_i are at least sigma_(k+1). Since A_k attains this lower bound, it is optimal in spectral norm."
+      },
+      {
+        "kind": "heading",
+        "text": "Frobenius-norm lower bound"
+      },
+      {
+        "kind": "paragraph",
+        "text": "Let H be the orthogonal projector onto the column space of M, with dimension d <= k. Because (I-H)M = 0, split the residual into perpendicular column-space components:"
+      },
+      {
+        "kind": "equation",
+        "latex": "\\left\\|A-M\\right\\|_F^2=\\left\\|H(A-M)\\right\\|_F^2+\\left\\|(I-H)A\\right\\|_F^2\\ge\\left\\|A\\right\\|_F^2-\\operatorname{tr}(HAA^T)."
+      },
+      {
+        "kind": "paragraph",
+        "text": "For the full left basis, set alpha_i = u_i-transpose H u_i. A projector gives 0 <= alpha_i <= 1 and the sum of all m alpha_i equals trace(H) = d <= k. Consequently:"
+      },
+      {
+        "kind": "equation",
+        "latex": "\\operatorname{tr}(HAA^T)=\\sum_{i=1}^{r}\\sigma_i^2\\alpha_i\\le\\sum_{i=1}^{k}\\sigma_i^2."
+      },
+      {
+        "kind": "paragraph",
+        "text": "To justify this bound, pad the squared singular values with zeros to length m. Under the constraints on alpha, the largest weighted sum places unit weight on the k largest values. For k >= 1, the same result follows by bounding the tail weights with sigma_k squared and using the total-weight constraint. For k = 0 every alpha is zero."
+      },
+      {
+        "kind": "equation",
+        "latex": "\\left\\|A-M\\right\\|_F^2\\ge\\sum_{i=k+1}^{r}\\sigma_i^2."
+      },
+      {
+        "kind": "paragraph",
+        "text": "The truncation attains equality because H projects onto its first k left modes and H A = A_k. Thus A_k is optimal in Frobenius norm as well. These proofs apply to every competitor, without assuming its singular vectors align with those of A."
+      }
+    ]
+  },
+  {
+    "title": "Problem 10. Low-rank approximation and compression",
+    "blocks": [
+      {
+        "kind": "heading",
+        "text": "1. Store factors, reconstruct on demand"
+      },
+      {
+        "kind": "paragraph",
+        "text": "Compute the SVD once and store only the first k columns of U and V and the first k singular values. Reconstruct their product when a dense matrix is needed. If one instead stores the dense reconstructed A_k, the low-rank storage saving is lost."
+      },
+      {
+        "kind": "equation",
+        "latex": "A_k=U_k\\Sigma_kV_k^T=\\sum_{i=1}^{k}\\sigma_i u_i v_i^T."
+      },
+      {
+        "kind": "heading",
+        "text": "2-3. Scalar counts"
+      },
+      {
+        "kind": "table",
+        "headers": [
+          "Representation",
+          "Stored scalars"
+        ],
+        "rows": [
+          [
+            "Dense m-by-n matrix",
+            "mn"
+          ],
+          [
+            "U_k",
+            "mk"
+          ],
+          [
+            "Diagonal of Sigma_k",
+            "k"
+          ],
+          [
+            "V_k-transpose",
+            "kn"
+          ],
+          [
+            "All three factors",
+            "k(m+n+1)"
+          ]
+        ]
+      },
+      {
+        "kind": "paragraph",
+        "text": "Only the diagonal of Sigma_k is stored, rather than a dense k-by-k array. These are direct factor-storage counts, without exploiting orthogonality to encode fewer parameters."
+      },
+      {
+        "kind": "heading",
+        "text": "4. Condition for fewer numbers"
+      },
+      {
+        "kind": "equation",
+        "latex": "k(m+n+1)<mn\\quad\\Longleftrightarrow\\quad k<\\frac{mn}{m+n+1}."
+      },
+      {
+        "kind": "paragraph",
+        "text": "The inequality is strict: equality gives no scalar saving. For integer k the maximum saving rank is the ceiling of the right-hand side minus one, subject to the rank limit. The factors and original must use comparable scalar sizes for this count to translate to raw-byte savings."
+      },
+      {
+        "kind": "heading",
+        "text": "5-6. Relative Frobenius error"
+      },
+      {
+        "kind": "equation",
+        "latex": "E_k=\\frac{\\left\\|A-A_k\\right\\|_F}{\\left\\|A\\right\\|_F}=\\left(\\frac{\\sum_{i=k+1}^{r}\\sigma_i^2}{\\sum_{i=1}^{r}\\sigma_i^2}\\right)^{1/2}."
+      },
+      {
+        "kind": "paragraph",
+        "text": "At k = 0 the relative error is one; at k >= r it is zero. The formula assumes A is nonzero. The retained squared-energy fraction is 1 - E_k squared."
+      },
+      {
+        "kind": "heading",
+        "text": "7. Role of singular-value decay"
+      },
+      {
+        "kind": "paragraph",
+        "text": "Rapid decay makes the omitted squared tail small at a modest k, allowing both a small error and a scalar saving. A nearly flat spectrum requires many modes for accurate reconstruction, potentially exceeding the storage break-even rank. Small average error can still hide loss of fine features; visually important local structure need not dominate total squared energy."
+      }
+    ]
+  },
+  {
+    "title": "Problem 11. Principal component analysis",
+    "blocks": [
+      {
+        "kind": "heading",
+        "text": "1. Covariance from the SVD"
+      },
+      {
+        "kind": "equation",
+        "latex": "C=\\frac{X^TX}{m-1}=V\\left(\\frac{\\Sigma^T\\Sigma}{m-1}\\right)V^T."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Insert X = U Sigma V-transpose into the covariance definition and use U-transpose U = I. Here the rows are observations, the columns are variables, and the column means have been subtracted. The factor m-1 requires m > 1."
+      },
+      {
+        "kind": "heading",
+        "text": "2. Principal directions"
+      },
+      {
+        "kind": "paragraph",
+        "text": "For any unit variable-space direction w, the sample variance of the projected observations Xw is w-transpose C w. Its maximum is the largest covariance eigenvalue, attained at the first right singular vector. Restricting w to successive orthogonal complements gives v_2, v_3 and so on. These right singular vectors are therefore the principal directions. Repeated eigenvalues permit different orthonormal choices within the same principal subspace."
+      },
+      {
+        "kind": "heading",
+        "text": "3. Variance of a score component"
+      },
+      {
+        "kind": "equation",
+        "latex": "Xv_i=\\sigma_i u_i,\\qquad \\operatorname{Var}(Xv_i)=\\frac{\\left\\|Xv_i\\right\\|_2^2}{m-1}=\\frac{\\sigma_i^2}{m-1}."
+      },
+      {
+        "kind": "paragraph",
+        "text": "The scores have sample mean zero because X is centered. Orthogonality makes distinct score columns uncorrelated."
+      },
+      {
+        "kind": "heading",
+        "text": "4. Cumulative explained variance"
+      },
+      {
+        "kind": "equation",
+        "latex": "R_k=\\frac{\\sum_{i=1}^{k}\\sigma_i^2/(m-1)}{\\sum_{i=1}^{r}\\sigma_i^2/(m-1)}=\\frac{\\sum_{i=1}^{k}\\sigma_i^2}{\\sum_{i=1}^{r}\\sigma_i^2}=1-E_k^2."
+      },
+      {
+        "kind": "paragraph",
+        "text": "The common covariance normalization cancels. For a zero centered matrix the total variance is zero, so a variance ratio is undefined rather than an arbitrary percentage."
+      },
+      {
+        "kind": "heading",
+        "text": "5. Choose a reduced dimension"
+      },
+      {
+        "kind": "paragraph",
+        "text": "Choose a target, for example 95%, and retain the smallest k with R_k at least that target. Also inspect the spectrum and assess the intended downstream task on independent validation data. Explained variance does not guarantee preservation of low-variance predictive signals. Variables in different units may require training-fitted standardization before PCA."
+      },
+      {
+        "kind": "heading",
+        "text": "6. Practical example"
+      },
+      {
+        "kind": "paragraph",
+        "text": "For aligned grayscale face photographs, flatten each image into a row, fit the training mean and PCA basis, and retain a small coefficient vector per image. A reconstruction adds the training mean to the projected low-rank image. This supports compact representation and feature extraction; the basis and mean must also be stored, and fitting should not use held-out test images."
+      }
+    ]
+  },
+  {
+    "title": "Problem 12. Image compression: setup and images",
+    "blocks": [
+      {
+        "kind": "heading",
+        "text": "1-2. Input and prescribed reconstructions"
+      },
+      {
+        "kind": "paragraph",
+        "text": "The input is a 512-by-512 grayscale luminance matrix derived from the archived NASA astronaut photograph used in the earlier course experiment. RGB uint8 pixels are divided by 255 and combined with weights 0.2126, 0.7152 and 0.0722. The resulting float64 matrix A, rather than the rounded preview PNG, is used in all computations. No mean centering is applied."
+      },
+      {
+        "kind": "equation",
+        "latex": "A=0.2126R+0.7152G+0.0722B,\\qquad A_k=(U_{:,1:k}\\Sigma_k)V_{:,1:k}^T."
+      },
+      {
+        "kind": "paragraph",
+        "text": "NumPy computes a reduced SVD with full_matrices=False. Reduced SVD controls factor shapes; slicing retains k = 5,10,20,50,100. Each raw reconstructed matrix is saved as a NumPy array. Display clipping to [0,1] does not affect the reported raw Frobenius errors."
+      },
+      {
+        "kind": "heading",
+        "text": "5. Reconstructed images"
+      },
+      {
+        "kind": "figure",
+        "name": "image_reconstructions.png",
+        "caption": "Figure 1. Original grayscale photograph and all five prescribed approximations. E is the relative Frobenius error before display clipping.",
+        "height": 4.25
+      },
+      {
+        "kind": "paragraph",
+        "text": "Broad intensity structure survives at small k. Facial features, suit seams and background edges sharpen as more modes are retained. The same grayscale range is used for every panel."
+      }
+    ]
+  },
+  {
+    "title": "Problem 12 continued. Metrics and singular values",
+    "blocks": [
+      {
+        "kind": "heading",
+        "text": "3-4. Numerical errors and storage fractions"
+      },
+      {
+        "kind": "table",
+        "headers": [
+          "k",
+          "Relative error E_k",
+          "Storage fraction rho_k",
+          "Energy (%)",
+          "Factor scalars"
+        ],
+        "rows": [
+          [
+            "5",
+            "0.29167809",
+            "0.01955032",
+            "91.4924",
+            "5,125"
+          ],
+          [
+            "10",
+            "0.21033958",
+            "0.03910065",
+            "95.5757",
+            "10,250"
+          ],
+          [
+            "20",
+            "0.14731378",
+            "0.07820129",
+            "97.8299",
+            "20,500"
+          ],
+          [
+            "50",
+            "0.08069640",
+            "0.19550323",
+            "99.3488",
+            "51,250"
+          ],
+          [
+            "100",
+            "0.04266313",
+            "0.39100647",
+            "99.8180",
+            "102,500"
+          ]
+        ]
+      },
+      {
+        "kind": "paragraph",
+        "text": "The original contains 262,144 scalars. As defined by the assignment, rho is factor count divided by original count, not its reciprocal. All five values are below one. At k = 20, the factors use 7.8201% of the original scalar count and the relative error is 14.7314%."
+      },
+      {
+        "kind": "equation",
+        "latex": "\\rho_k=\\frac{1025k}{262144},\\qquad E_k=\\frac{\\left(\\sum_{i>k}\\sigma_i^2\\right)^{1/2}}{\\left(\\sum_i\\sigma_i^2\\right)^{1/2}}."
+      },
+      {
+        "kind": "heading",
+        "text": "6. Semilog singular-value plot"
+      },
+      {
+        "kind": "figure",
+        "name": "image_spectrum.png",
+        "caption": "Figure 2. All 512 singular values of the grayscale matrix on a logarithmic vertical scale.",
+        "height": 2.6
+      },
+      {
+        "kind": "heading",
+        "text": "7. Interpretation and storage limits"
+      },
+      {
+        "kind": "paragraph",
+        "text": "The spectrum decays strongly but has a long tail, so increasing k lowers global error while recovering finer structure. The relative error decreases from 0.291678 at k = 5 to 0.042663 at k = 100. Energy retention at k = 20 is already 97.8299%, yet the reconstruction still loses some detail."
+      },
+      {
+        "kind": "paragraph",
+        "text": "The equal-dtype scalar break-even rank is 255.750244, so integer k <= 255 saves scalars. If float32 factors are compared with an 8-bit grayscale payload, their raw-byte fraction is 4 rho_k: k = 100 then expands that payload. PNG/JPEG encoding, metadata and visual comparisons with those codecs are outside this experiment."
+      }
+    ]
+  },
+  {
+    "title": "Problem 13. Noisy data matrix: construction and rank",
+    "blocks": [
+      {
+        "kind": "heading",
+        "text": "1-3. Reproducible construction"
+      },
+      {
+        "kind": "equation",
+        "latex": "P\\in\\mathbb{R}^{100\\times5},\\quad Q\\in\\mathbb{R}^{80\\times5},\\quad B=PQ^T,\\quad A=B+0.05N."
+      },
+      {
+        "kind": "paragraph",
+        "text": "A NumPy default_rng generator with seed 20261009 draws P, Q and N in that order with independent standard-normal entries. N has shape 100-by-80. The experiment verifies that B has rank five. The matrices, noise, factors and singular values are saved together in data_matrix.npz."
+      },
+      {
+        "kind": "heading",
+        "text": "4. Singular-value plot"
+      },
+      {
+        "kind": "figure",
+        "name": "data_spectrum.png",
+        "caption": "Figure 3. Singular values of the 100-by-80 noisy matrix. The vertical marker separates the five signal modes from the remaining modes.",
+        "height": 2.7
+      },
+      {
+        "kind": "table",
+        "headers": [
+          "Index i",
+          "Singular value of A"
+        ],
+        "rows": [
+          [
+            "1",
+            "118.71873950"
+          ],
+          [
+            "2",
+            "95.91731047"
+          ],
+          [
+            "3",
+            "88.76113675"
+          ],
+          [
+            "4",
+            "84.28503737"
+          ],
+          [
+            "5",
+            "67.00138142"
+          ],
+          [
+            "6",
+            "0.87787015"
+          ]
+        ]
+      },
+      {
+        "kind": "heading",
+        "text": "5. Approximate rank and exact rank"
+      },
+      {
+        "kind": "paragraph",
+        "text": "The fifth singular value is 67.001381, while the sixth is 0.877870, a gap of approximately 76.32. This identifies five dominant signal modes. The measured noisy matrix nevertheless has numerical rank 80: approximate rank five does not mean its remaining singular values are exactly zero."
+      },
+      {
+        "kind": "paragraph",
+        "text": "The noise Frobenius norm is 2.1492% of the clean signal norm. Its spectral norm is 0.911068, well below the five signal singular values. These are observations for this controlled generated dataset."
+      }
+    ]
+  },
+  {
+    "title": "Problem 13 continued. Errors for k = 1 through 20",
+    "blocks": [
+      {
+        "kind": "heading",
+        "text": "6. All requested truncations"
+      },
+      {
+        "kind": "table",
+        "headers": [
+          "k",
+          "Relative error to A",
+          "Relative error to clean B"
+        ],
+        "rows": [
+          [
+            "1",
+            "0.81888354",
+            "0.81871052"
+          ],
+          [
+            "2",
+            "0.67493018",
+            "0.67467153"
+          ],
+          [
+            "3",
+            "0.52094289",
+            "0.52034825"
+          ],
+          [
+            "4",
+            "0.32455618",
+            "0.32426647"
+          ],
+          [
+            "5",
+            "0.02021444",
+            "0.00728249"
+          ],
+          [
+            "6",
+            "0.01976387",
+            "0.00842984"
+          ],
+          [
+            "7",
+            "0.01933979",
+            "0.00936229"
+          ],
+          [
+            "8",
+            "0.01892259",
+            "0.01017961"
+          ],
+          [
+            "9",
+            "0.01852020",
+            "0.01089489"
+          ],
+          [
+            "10",
+            "0.01812198",
+            "0.01154551"
+          ],
+          [
+            "11",
+            "0.01773313",
+            "0.01213474"
+          ],
+          [
+            "12",
+            "0.01734243",
+            "0.01268714"
+          ],
+          [
+            "13",
+            "0.01697894",
+            "0.01317000"
+          ],
+          [
+            "14",
+            "0.01661133",
+            "0.01363111"
+          ],
+          [
+            "15",
+            "0.01623945",
+            "0.01407240"
+          ],
+          [
+            "16",
+            "0.01588762",
+            "0.01446870"
+          ],
+          [
+            "17",
+            "0.01552869",
+            "0.01485370"
+          ],
+          [
+            "18",
+            "0.01517998",
+            "0.01521005"
+          ],
+          [
+            "19",
+            "0.01482954",
+            "0.01555211"
+          ],
+          [
+            "20",
+            "0.01448197",
+            "0.01587641"
+          ]
+        ]
+      },
+      {
+        "kind": "heading",
+        "text": "7. Approximation-error plot"
+      },
+      {
+        "kind": "figure",
+        "name": "data_error.png",
+        "caption": "Figure 4. Relative Frobenius error measured against the noisy matrix A, for all requested ranks.",
+        "height": 2.15
+      },
+      {
+        "kind": "heading",
+        "text": "8. Why the error drops near rank five"
+      },
+      {
+        "kind": "paragraph",
+        "text": "At k = 4, one large signal mode is still omitted and the error to A is 0.324556. At k = 5, all five dominant modes are included and it falls to 0.020214. Higher ranks mostly fit the much smaller noise tail, so improvement against A becomes gradual. Error against clean B instead rises from 0.007282 at k = 5 to 0.015876 at k = 20. Fitting noisy data more closely can reduce denoising quality; the clean reference is available here because the experiment generated it."
+      }
+    ]
+  },
+  {
+    "title": "Problem 14. Regularization and small singular values",
+    "blocks": [
+      {
+        "kind": "heading",
+        "text": "1. Expand the pseudoinverse solution"
+      },
+      {
+        "kind": "equation",
+        "latex": "x=A^+b=\\sum_{i=1}^{r}\\frac{u_i^Tb}{\\sigma_i}v_i."
+      },
+      {
+        "kind": "paragraph",
+        "text": "This follows by multiplying V_r Sigma_r-inverse U_r-transpose by b. Only positive singular values are inverted; null-space coordinates are zero."
+      },
+      {
+        "kind": "heading",
+        "text": "2. Noise amplification"
+      },
+      {
+        "kind": "equation",
+        "latex": "\\Delta x=A^+\\Delta b=\\sum_{i=1}^{r}\\frac{u_i^T\\Delta b}{\\sigma_i}v_i,\\qquad \\left\\|\\Delta x\\right\\|_2\\le\\frac{\\left\\|\\Delta b\\right\\|_2}{\\sigma_r}."
+      },
+      {
+        "kind": "paragraph",
+        "text": "A perturbation delta times u_r produces delta/sigma_r times v_r. If sigma_r is tiny, even a small noise component can dominate the recovered coefficient. Not every perturbation reaches the bound; amplification depends on its singular-direction projections."
+      },
+      {
+        "kind": "heading",
+        "text": "3-4. Truncated-SVD regularization"
+      },
+      {
+        "kind": "equation",
+        "latex": "x_k=\\sum_{i=1}^{k}\\frac{u_i^Tb}{\\sigma_i}v_i,\\qquad \\left\\|\\Delta x_k\\right\\|_2\\le\\frac{\\left\\|\\Delta b\\right\\|_2}{\\sigma_k}."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Keep only sufficiently large singular values. Discarded directions contribute no noise amplification, and the retained worst-case amplification is reduced. The cost is bias: genuine solution components in discarded directions are lost. The bound applies for k >= 1; at k = 0 the estimate is zero."
+      },
+      {
+        "kind": "heading",
+        "text": "5. Tikhonov regularization"
+      },
+      {
+        "kind": "paragraph",
+        "text": "For lambda > 0, minimizing the squared residual plus lambda times the squared solution norm gives a unique solution even when A is rank deficient:"
+      },
+      {
+        "kind": "equation",
+        "latex": "x_\\lambda=(A^TA+\\lambda I)^{-1}A^Tb=\\sum_{i=1}^{r}\\frac{\\sigma_i}{\\sigma_i^2+\\lambda}(u_i^Tb)v_i."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Relative to the pseudoinverse coefficient, TSVD uses a hard filter equal to one for retained modes and zero otherwise. Tikhonov uses the smooth filter sigma_i squared divided by sigma_i squared plus lambda. Its direct amplification factor tends to zero for small sigma_i and is bounded by 1/(2 sqrt(lambda)), because sigma_i squared plus lambda is at least 2 sigma_i sqrt(lambda)."
+      },
+      {
+        "kind": "heading",
+        "text": "6. Choosing lambda"
+      },
+      {
+        "kind": "paragraph",
+        "text": "As lambda decreases toward zero, the estimate approaches the minimum-norm pseudoinverse solution and may fit noise. As lambda grows, the estimate shrinks and bias increases. Select lambda using the noise scale, an independent validation criterion, a discrepancy principle or an L-curve rather than an unexamined universal constant. In this assignment lambda multiplies the penalty directly; a convention using lambda squared changes the denominator accordingly."
+      }
+    ]
+  },
+  {
+    "title": "Problem 15. Why SVD is a fundamental tool",
+    "blocks": [
+      {
+        "kind": "paragraph",
+        "text": "Singular value decomposition is fundamental because it describes a linear map through orthonormal directions and nonnegative scales. For a rectangular matrix, ordinary eigenvectors may not even be defined, while SVD always exists. Its right factor chooses input coordinates, its diagonal factor stretches them, and its left factor chooses output coordinates. A sphere therefore becomes an ellipsoid, possibly collapsed into a lower-dimensional subspace. This geometric description links the entries of a matrix to its actual action on vectors."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Singular values also provide a precise language for rank and sensitivity. Exact rank counts the positive singular values; numerical rank requires a tolerance tied to rounding and data uncertainty. The largest singular value is the spectral norm, and the squared Frobenius norm is the sum of their squares. For an invertible square matrix, the ratio between the largest and smallest singular values is its spectral condition number. A small final singular value identifies a direction in which the data barely change even when the input changes substantially. Attempting to invert such a direction can amplify noise."
+      },
+      {
+        "kind": "paragraph",
+        "text": "For least squares, SVD separates observable coefficients from unobservable ones. The positive modes determine the fitted output, while the null-space directions leave that output unchanged. The pseudoinverse inverts only positive modes and sets the remaining coordinates to zero, yielding the unique minimum-norm least-squares solution. This handles rectangular and rank-deficient systems in the same framework. It also exposes why directly solving normal equations can be unreliable: forming the Gram matrix squares the positive singular-value condition ratio."
+      },
+      {
+        "kind": "paragraph",
+        "text": "A further reason for the importance of SVD is that truncation is mathematically optimal. Keeping the first k singular terms gives a best approximation among all matrices of rank at most k in spectral and Frobenius norms. The error is determined exactly by the omitted singular values. This turns dimensionality reduction into a measurable tradeoff rather than an arbitrary removal of entries. When the spectrum decays quickly, a few modes preserve most of the global information. However, this guarantee concerns matrix norms, so it does not automatically preserve every visually or scientifically important feature."
+      },
+      {
+        "kind": "paragraph",
+        "text": "The same ideas connect numerical linear algebra with data science. For centered observations, the right singular vectors are PCA directions and their squared singular values determine explained variance. Image compression stores a low-rank factorization, although model precision and file encoding must be counted separately from scalar savings. In noisy inverse problems, truncated SVD and Tikhonov filters suppress directions that are too unstable to recover reliably. The generated data experiment in this report illustrates the distinction: retaining more noise modes improves the fit to the noisy matrix while worsening recovery of the clean signal."
+      },
+      {
+        "kind": "paragraph",
+        "text": "SVD therefore supplies one coherent framework for geometry, approximation, estimation and stability. It is not always the cheapest computation for a very large matrix, and data preprocessing or task-specific validation remains necessary. Its value is that it makes those decisions interpretable: one can identify the retained subspace, quantify the discarded tail, recognize a null space and assess the effect of noise before trusting a computed answer."
+      }
+    ]
+  },
+  {
+    "title": "Optional challenge. Complex singular value decomposition",
+    "blocks": [
+      {
+        "kind": "heading",
+        "text": "1. Hermitian positive semidefiniteness"
+      },
+      {
+        "kind": "equation",
+        "latex": "(A^*A)^*=A^*A,\\qquad z^*A^*Az=\\left\\|Az\\right\\|_2^2\\ge0."
+      },
+      {
+        "kind": "paragraph",
+        "text": "The conjugate-transpose identity proves that the Gram matrix is Hermitian. Its quadratic form is real and nonnegative for every complex vector z, so it is positive semidefinite."
+      },
+      {
+        "kind": "heading",
+        "text": "2. Derive the complex SVD"
+      },
+      {
+        "kind": "paragraph",
+        "text": "The Hermitian spectral theorem gives A-star A = V Lambda V-star with V unitary and nonnegative real eigenvalues. For each positive eigenvalue set sigma_i to its square root and u_i = Av_i/sigma_i. Then:"
+      },
+      {
+        "kind": "equation",
+        "latex": "u_i^*u_j=\\frac{v_i^*A^*Av_j}{\\sigma_i\\sigma_j}=\\delta_{ij}."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Complete these vectors to an orthonormal basis of complex m-dimensional space. The zero-eigenvalue right modes satisfy Av_i = 0. Hence AV = U Sigma and A = U Sigma V-star, where U and V are unitary and Sigma is real nonnegative rectangular diagonal."
+      },
+      {
+        "kind": "heading",
+        "text": "3. Singular values of A and its adjoint"
+      },
+      {
+        "kind": "equation",
+        "latex": "A^*=V\\Sigma^T U^*,\\qquad AA^*=U\\Sigma\\Sigma^T U^*,\\qquad A^*A=V\\Sigma^T\\Sigma V^*."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Sigma is real, so its adjoint is its transpose. Both Gram matrices have the same r positive eigenvalues sigma_i squared; their zero eigenvalue multiplicities are m-r and n-r. The singular-value lists of A and A-star, each of length min(m,n), are identical including zeros. The Gram spectra can contain different numbers of additional zeros for rectangular matrices."
+      },
+      {
+        "kind": "heading",
+        "text": "4. Spectral norm"
+      },
+      {
+        "kind": "equation",
+        "latex": "\\left\\|Ax\\right\\|_2^2=\\sum_{i=1}^{r}\\sigma_i^2\\left|v_i^*x\\right|^2\\le\\sigma_1^2\\left\\|x\\right\\|_2^2."
+      },
+      {
+        "kind": "paragraph",
+        "text": "Unitary factors preserve the complex Euclidean norm. Equality holds at x = v_1 when A is nonzero, proving that its spectral norm is sigma_1."
+      },
+      {
+        "kind": "heading",
+        "text": "5. Transpose versus conjugate transpose"
+      },
+      {
+        "kind": "paragraph",
+        "text": "The transpose only interchanges rows and columns; the conjugate transpose additionally conjugates every entry. The complex inner product conjugates its first argument, so unitarity uses V-star V = I. Using V-transpose would generally destroy this norm-preserving identity. For a real matrix the conjugation changes nothing and V-star equals V-transpose."
+      }
+    ]
+  },
+  {
+    "title": "Appendix A. Reproduction and complete source code",
+    "blocks": [
+      {
+        "kind": "paragraph",
+        "text": "The following appendix reproduces the complete run_experiments.py file delivered with the report. It executes both required experiments, saves raw results and figures, and independently verifies the specified numerical examples. Generated data are controlled numerical experiments, not observations from an external scientific dataset."
+      },
+      {
+        "kind": "heading",
+        "text": "Reproduction"
+      },
+      {
+        "kind": "code",
+        "text": "python -m venv .venv\nsource .venv/bin/activate\npython -m pip install -r requirements.txt\npython 02_Experiments/run_experiments.py"
+      },
+      {
+        "kind": "paragraph",
+        "text": "Run from the submission folder. On Windows activate .venv\\Scripts\\activate instead. The archived photograph is included, so the numerical script requires no network access. NumPy uses LAPACK for the dense SVD; differing libraries may change final floating-point digits or singular-vector signs without changing the represented matrix."
+      },
+      {
+        "kind": "table",
+        "headers": [
+          "Item",
+          "Recorded value"
+        ],
+        "rows": [
+          [
+            "Execution date",
+            "9 October 2026"
+          ],
+          [
+            "Python",
+            "3.13.7"
+          ],
+          [
+            "NumPy",
+            "2.5.3"
+          ],
+          [
+            "Matplotlib / Pillow",
+            "3.11.2 / 12.3.0"
+          ],
+          [
+            "Platform",
+            "macOS-27.0-arm64-arm-64bit-Mach-O"
+          ],
+          [
+            "Random seed / epsilon",
+            "20261009 / 0.05"
+          ],
+          [
+            "Numerical assertions",
+            "39/39 passed"
+          ]
+        ]
+      },
+      {
+        "kind": "heading",
+        "text": "Output files"
+      },
+      {
+        "kind": "paragraph",
+        "text": "image_metrics.csv contains all five errors, storage fractions and retained energies; image_singular_values.csv contains all 512 image singular values. data_errors.csv contains all 20 requested ranks and an additional clean-reference comparison; data_singular_values.csv contains all 80 data singular values. data_matrix.npz stores P,Q,N,B,C,A and the SVD. The raw grayscale matrix and all five image approximations are saved as NPY files. verification.json records every numerical assertion."
+      },
+      {
+        "kind": "heading",
+        "text": "Sources and preparation"
+      },
+      {
+        "kind": "paragraph",
+        "text": "The attached assignment dated 24 August 2026 supplies the questions. The supplied course report template supplies the first-page layout, translated into English. The archived astronaut.png comes from the NASA photograph distributed as the astronaut sample in the preceding course package. All results here were computed anew for this assignment. Codex assisted with derivations, code execution and document preparation; personal and assessment information remains blank."
+      },
+      {
+        "kind": "paragraph",
+        "text": "The report states the SVD, least-squares and optimal-approximation arguments directly, with their proofs. No experimental result from the previous report is presented as a newly measured result in this homework."
+      }
+    ]
+  },
+  {
+    "title": "Appendix A. Python source, lines 1-51",
+    "blocks": [
+      {
+        "kind": "code",
+        "text": "#!/usr/bin/env python3\n\"\"\"Reproduce SVD Homework Problems 12/13 and verify numerical examples.\"\"\"\nfrom pathlib import Path\nimport csv, hashlib, json, platform, sys\nimport numpy as np\nimport matplotlib\nmatplotlib.use('Agg')\nimport matplotlib.pyplot as plt\nfrom PIL import Image\nimport PIL\n\nROOT = Path(__file__).resolve().parent\nOUT = ROOT / 'results'\nOUT.mkdir(exist_ok=True)\nSEED = 20261009\nchecks = {}\n\ndef check(name, condition):\n    checks[name] = bool(condition)\n    if not condition:\n        raise AssertionError(name)\n\ndef write_csv(name, rows):\n    with (OUT / name).open('w', newline='') as stream:\n        writer = csv.DictWriter(stream, fieldnames=list(rows[0]))\n        writer.writeheader()\n        writer.writerows(rows)\n\ndef save_plot(name):\n    plt.savefig(OUT / name, dpi=180, bbox_inches='tight')\n    plt.close()\n\n# Problem 12: luminance of the archived NASA astronaut photograph.\nrgb = np.asarray(Image.open(ROOT / 'data/astronaut.png'), dtype=float) / 255\nA = rgb @ np.array([0.2126, 0.7152, 0.0722])\nm, n = A.shape\nnp.save(ROOT / 'data/grayscale.npy', A)\nImage.fromarray(np.rint(A * 255).astype('uint8')).save(\n    ROOT / 'data/grayscale_preview.png')\nU, s, Vt = np.linalg.svd(A, full_matrices=False)\nimage_rows = []\nranks = [5, 10, 20, 50, 100]\nfig, axes = plt.subplots(2, 3, figsize=(10, 6.7))\naxes.flat[0].imshow(A, cmap='gray', vmin=0, vmax=1)\naxes.flat[0].set_title('Original (512 x 512)')\nfor ax, k in zip(list(axes.flat)[1:], ranks):\n    Ak = (U[:, :k] * s[:k]) @ Vt[:k]\n    error = np.linalg.norm(A - Ak, 'fro') / np.linalg.norm(A, 'fro')\n    tail = np.linalg.norm(s[k:]) / np.linalg.norm(s)\n    rho = k * (m + n + 1) / (m * n)\n    check(f'image_tail_identity_k{k}', np.isclose(error, tail, rtol=1e-11))"
+      }
+    ]
+  },
+  {
+    "title": "Appendix A. Python source, lines 52-102",
+    "blocks": [
+      {
+        "kind": "code",
+        "text": "    image_rows.append(dict(k=k, relative_error=float(error),\n                           storage_fraction=float(rho),\n                           retained_energy=float(1 - error**2),\n                           factor_scalars=k * (m + n + 1)))\n    np.save(OUT / f'image_rank_{k}.npy', Ak)\n    ax.imshow(np.clip(Ak, 0, 1), cmap='gray', vmin=0, vmax=1)\n    ax.set_title(f'k = {k}; E = {error:.4f}')\nfor ax in axes.flat:\n    ax.axis('off')\nfig.tight_layout()\nsave_plot('image_reconstructions.png')\nplt.figure(figsize=(8, 3.6))\nplt.semilogy(np.arange(1, len(s) + 1), s)\nplt.xlabel('Singular value index'); plt.ylabel('Singular value (log scale)')\nplt.title('Problem 12: grayscale singular value spectrum')\nplt.grid(alpha=.25); save_plot('image_spectrum.png')\nwrite_csv('image_metrics.csv', image_rows)\nwrite_csv('image_singular_values.csv',\n          [dict(index=i + 1, singular_value=float(v)) for i, v in enumerate(s)])\ncheck('image_full_reconstruction', np.allclose((U * s) @ Vt, A, atol=1e-12))\ncheck('image_error_monotone', np.all(np.diff([r['relative_error'] for r in image_rows]) < 0))\n\n# Problem 13: rank-five signal with independent Gaussian noise.\nrng = np.random.default_rng(SEED)\nP = rng.standard_normal((100, 5))\nQ = rng.standard_normal((80, 5))\nN = rng.standard_normal((100, 80))\nepsilon = 0.05\nB = P @ Q.T\nC = epsilon * N\nM = B + C\nUm, sm, Vtm = np.linalg.svd(M, full_matrices=False)\ndata_rows = []\nfor k in range(1, 21):\n    Mk = (Um[:, :k] * sm[:k]) @ Vtm[:k]\n    error = np.linalg.norm(M - Mk, 'fro') / np.linalg.norm(M, 'fro')\n    tail = np.linalg.norm(sm[k:]) / np.linalg.norm(sm)\n    check(f'data_tail_identity_k{k}', np.isclose(error, tail, rtol=1e-11))\n    data_rows.append(dict(k=k, relative_error=float(error),\n                          error_to_clean_B=float(np.linalg.norm(B - Mk, 'fro') /\n                                                 np.linalg.norm(B, 'fro'))))\nwrite_csv('data_errors.csv', data_rows)\nwrite_csv('data_singular_values.csv',\n          [dict(index=i + 1, singular_value=float(v)) for i, v in enumerate(sm)])\nnp.savez_compressed(OUT / 'data_matrix.npz', P=P, Q=Q, N=N, B=B,\n                    C=C, A=M, U=Um, s=sm, Vt=Vtm)\nplt.figure(figsize=(8, 3.6))\nplt.semilogy(np.arange(1, 81), sm, 'o-', markersize=3)\nplt.axvline(5.5, color='crimson', linestyle='--', label='Signal/noise boundary')\nplt.xlabel('Singular value index'); plt.ylabel('Singular value (log scale)')\nplt.title('Problem 13: five dominant modes and a noise tail')"
+      }
+    ]
+  },
+  {
+    "title": "Appendix A. Python source, lines 103-153",
+    "blocks": [
+      {
+        "kind": "code",
+        "text": "plt.legend(); plt.grid(alpha=.25); save_plot('data_spectrum.png')\nplt.figure(figsize=(8, 3.6))\nplt.semilogy(range(1, 21), [r['relative_error'] for r in data_rows], 'o-')\nplt.axvline(5, color='crimson', linestyle='--', label='k = 5')\nplt.xlabel('Retained rank k'); plt.ylabel('Relative Frobenius error (log scale)')\nplt.xticks(range(1, 21)); plt.legend(); plt.grid(alpha=.25)\nplt.title('Problem 13: approximation error against the noisy matrix A')\nsave_plot('data_error.png')\ncheck('clean_matrix_rank5', np.linalg.matrix_rank(B) == 5)\ncheck('noisy_matrix_rank80', np.linalg.matrix_rank(M) == 80)\ncheck('data_error_monotone', np.all(np.diff([r['relative_error'] for r in data_rows]) < 0))\ncheck('noise_construction', np.allclose(M - B, epsilon * N))\ncheck('weyl_noise_bound', abs(sm[4] - np.linalg.svd(B, compute_uv=False)[4]) <= np.linalg.norm(C, 2))\n\n# Direct independent checks for Problems 3, 6, 7, 8 and the complex challenge.\nA3 = np.array([[3., 0], [0, 2], [0, 0]])\ncheck('problem3_singular_values', np.allclose(np.linalg.svd(A3, compute_uv=False), [3, 2]))\nA6 = np.array([[1., 0], [0, 2], [0, 0]])\nAp = np.array([[1., 0, 0], [0, .5, 0]])\ncheck('problem6_four_conditions', all([\n    np.allclose(A6 @ Ap @ A6, A6), np.allclose(Ap @ A6 @ Ap, Ap),\n    np.allclose((A6 @ Ap).T, A6 @ Ap), np.allclose((Ap @ A6).T, Ap @ A6)]))\nA7 = np.array([[1., 0], [1, 1], [1, 2]])\nb7 = np.array([1., 2, 2]); x7 = np.array([7 / 6, .5])\ncheck('problem7_lstsq', np.allclose(np.linalg.lstsq(A7, b7, rcond=None)[0], x7))\ncheck('problem7_residual_orthogonality', np.allclose(A7.T @ (b7 - A7 @ x7), 0))\nA8 = np.array([[1., 1], [2, 2], [3, 3]])\nb8 = np.array([1., 2, 4]); x8 = np.array([17 / 28, 17 / 28])\ncheck('problem8_minimum_norm', np.allclose(np.linalg.pinv(A8) @ b8, x8))\nZ = rng.standard_normal((7, 4)) + 1j * rng.standard_normal((7, 4))\nUz, sz, Vhz = np.linalg.svd(Z, full_matrices=False)\ncheck('complex_svd_reconstruction', np.allclose((Uz * sz) @ Vhz, Z))\ncheck('complex_adjoint_singular_values', np.allclose(sz, np.linalg.svd(Z.conj().T, compute_uv=False)))\n\nsummary = dict(seed=SEED, epsilon=epsilon, image_shape=[m, n],\n               image_source='Archived NASA astronaut RGB image; weighted luminance',\n               image_break_even=m * n / (m + n + 1), image_rows=image_rows,\n               data_rows=data_rows, data_leading_singular_values=sm[:10].tolist(),\n               clean_singular_values=np.linalg.svd(B, compute_uv=False)[:5].tolist(),\n               noise_relative_frobenius=float(np.linalg.norm(C, 'fro') / np.linalg.norm(B, 'fro')),\n               noise_spectral_norm=float(np.linalg.norm(C, 2)),\n               noisy_rank=int(np.linalg.matrix_rank(M)), clean_rank=int(np.linalg.matrix_rank(B)),\n               environment=dict(python=platform.python_version(), numpy=np.__version__,\n                                matplotlib=matplotlib.__version__, pillow=PIL.__version__,\n                                platform=platform.platform()),\n               checks_passed=sum(checks.values()), checks_total=len(checks))\n(OUT / 'summary.json').write_text(json.dumps(summary, indent=2))\n(OUT / 'verification.json').write_text(json.dumps(checks, indent=2))\n(OUT / 'input_sha256.json').write_text(json.dumps({\n    'astronaut.png': hashlib.sha256((ROOT / 'data/astronaut.png').read_bytes()).hexdigest()}, indent=2))\nprint(json.dumps(summary, indent=2))"
+      }
+    ]
+  }
+]

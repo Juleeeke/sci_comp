@@ -1,0 +1,193 @@
+{
+  "passed": 36,
+  "total": 36,
+  "details": {
+    "native_equations": 30,
+    "embedded_figures": 4,
+    "latex_pages": 10,
+    "word_pages": 10,
+    "numerical_verification": "38/38"
+  },
+  "checks": [
+    {
+      "name": "Every preserved source hash matches",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Required artifact 03_\u6700\u7ec8\u5b9e\u9a8c\u62a5\u544a/Report.docx",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Required artifact 03_\u6700\u7ec8\u5b9e\u9a8c\u62a5\u544a/Report.pdf",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Required artifact 04_LaTeX\u6e90\u7801/main.tex",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Required artifact 04_LaTeX\u6e90\u7801/compile.sh",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Required artifact equations.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Required artifact README.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Required artifact COVERAGE.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Required artifact requirements.txt",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Compiled PDF is exact delivered PDF",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "LaTeX log has no error or overfull box",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Template table dimensions retained",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Template merged cell structure retained",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Identity and date match user screenshot and unprovided assessment fields remain blank",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Authored Word text entirely English",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Every assigned section present",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "DOCX ZIP integrity",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Every formula is a native Office equation",
+      "passed": true,
+      "detail": "30 equations"
+    },
+    {
+      "name": "No unconverted LaTeX commands in equations",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "All figures embedded without whole page images",
+      "passed": true,
+      "detail": "4 figures"
+    },
+    {
+      "name": "latex correct page count",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "latex no empty pages",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "latex all section titles survive rendering",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "latex no replacement glyph",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "latex authored text within page bounds",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "latex every page rendered",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "word correct page count",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "word no empty pages",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "word all section titles survive rendering",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "word no replacement glyph",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "word authored text within page bounds",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "word every page rendered",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "All numerical verification checks pass",
+      "passed": true,
+      "detail": "38/38"
+    },
+    {
+      "name": "Report line normal system exactly matches data",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Report rational coefficients and RSS correct",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Literal rational system answer correct",
+      "passed": true,
+      "detail": ""
+    }
+  ]
+}

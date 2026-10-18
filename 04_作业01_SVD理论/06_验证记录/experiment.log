@@ -1,0 +1,181 @@
+{
+  "seed": 20261009,
+  "epsilon": 0.05,
+  "image_shape": [
+    512,
+    512
+  ],
+  "image_source": "Archived NASA astronaut RGB image; weighted luminance",
+  "image_break_even": 255.75024390243902,
+  "image_rows": [
+    {
+      "k": 5,
+      "relative_error": 0.2916780925642991,
+      "storage_fraction": 0.019550323486328125,
+      "retained_energy": 0.9149238903180521,
+      "factor_scalars": 5125
+    },
+    {
+      "k": 10,
+      "relative_error": 0.21033958264869151,
+      "storage_fraction": 0.03910064697265625,
+      "retained_energy": 0.9557572599711742,
+      "factor_scalars": 10250
+    },
+    {
+      "k": 20,
+      "relative_error": 0.14731378354792385,
+      "storage_fraction": 0.0782012939453125,
+      "retained_energy": 0.9782986491767954,
+      "factor_scalars": 20500
+    },
+    {
+      "k": 50,
+      "relative_error": 0.08069640470417855,
+      "storage_fraction": 0.19550323486328125,
+      "retained_energy": 0.9934880902678195,
+      "factor_scalars": 51250
+    },
+    {
+      "k": 100,
+      "relative_error": 0.042663129504673956,
+      "storage_fraction": 0.3910064697265625,
+      "retained_energy": 0.9981798573808675,
+      "factor_scalars": 102500
+    }
+  ],
+  "data_rows": [
+    {
+      "k": 1,
+      "relative_error": 0.818883540473128,
+      "error_to_clean_B": 0.8187105178718915
+    },
+    {
+      "k": 2,
+      "relative_error": 0.6749301826132273,
+      "error_to_clean_B": 0.6746715310359157
+    },
+    {
+      "k": 3,
+      "relative_error": 0.5209428899889107,
+      "error_to_clean_B": 0.5203482493937865
+    },
+    {
+      "k": 4,
+      "relative_error": 0.32455618124274666,
+      "error_to_clean_B": 0.32426646576345663
+    },
+    {
+      "k": 5,
+      "relative_error": 0.020214435536715078,
+      "error_to_clean_B": 0.0072824889903589695
+    },
+    {
+      "k": 6,
+      "relative_error": 0.019763867405272677,
+      "error_to_clean_B": 0.008429839133542267
+    },
+    {
+      "k": 7,
+      "relative_error": 0.019339785000556307,
+      "error_to_clean_B": 0.009362292899249992
+    },
+    {
+      "k": 8,
+      "relative_error": 0.018922588893425678,
+      "error_to_clean_B": 0.010179609607780622
+    },
+    {
+      "k": 9,
+      "relative_error": 0.018520204332324486,
+      "error_to_clean_B": 0.010894890145880036
+    },
+    {
+      "k": 10,
+      "relative_error": 0.01812198033515701,
+      "error_to_clean_B": 0.011545512120446393
+    },
+    {
+      "k": 11,
+      "relative_error": 0.017733132010920808,
+      "error_to_clean_B": 0.012134738427206464
+    },
+    {
+      "k": 12,
+      "relative_error": 0.0173424307787856,
+      "error_to_clean_B": 0.012687141523933741
+    },
+    {
+      "k": 13,
+      "relative_error": 0.016978944817915894,
+      "error_to_clean_B": 0.013169999016667721
+    },
+    {
+      "k": 14,
+      "relative_error": 0.016611330103916893,
+      "error_to_clean_B": 0.013631106659449239
+    },
+    {
+      "k": 15,
+      "relative_error": 0.016239447771633726,
+      "error_to_clean_B": 0.01407239836352846
+    },
+    {
+      "k": 16,
+      "relative_error": 0.01588762395749657,
+      "error_to_clean_B": 0.014468702563635647
+    },
+    {
+      "k": 17,
+      "relative_error": 0.01552869392899008,
+      "error_to_clean_B": 0.01485370433657912
+    },
+    {
+      "k": 18,
+      "relative_error": 0.01517998374046623,
+      "error_to_clean_B": 0.015210052263863754
+    },
+    {
+      "k": 19,
+      "relative_error": 0.014829543585593736,
+      "error_to_clean_B": 0.015552110807357127
+    },
+    {
+      "k": 20,
+      "relative_error": 0.01448197131942686,
+      "error_to_clean_B": 0.015876410478441853
+    }
+  ],
+  "data_leading_singular_values": [
+    118.71873949749455,
+    95.91731047170866,
+    88.76113675183124,
+    84.28503737021045,
+    67.00138141623748,
+    0.8778701521451773,
+    0.8423094229147596,
+    0.8264069286130034,
+    0.8028652199152535,
+    0.7901185599931992
+  ],
+  "clean_singular_values": [
+    118.73239422166709,
+    95.90295484318679,
+    88.8000786330575,
+    84.14966722698284,
+    67.036184867111
+  ],
+  "noise_relative_frobenius": 0.02149248469451188,
+  "noise_spectral_norm": 0.9110676423346163,
+  "noisy_rank": 80,
+  "clean_rank": 5,
+  "environment": {
+    "python": "3.13.7",
+    "numpy": "2.5.3",
+    "matplotlib": "3.11.2",
+    "pillow": "12.3.0",
+    "platform": "macOS-27.0-arm64-arm-64bit-Mach-O"
+  },
+  "checks_passed": 39,
+  "checks_total": 39
+}
